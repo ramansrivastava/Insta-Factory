@@ -39,10 +39,17 @@ smoke test, eval — passes on a clean checkout with no credentials.
 ```bash
 npm run typecheck    # tsc --noEmit, strict mode
 npm test             # vitest
-npm run build        # next build
+npm run build        # next build --turbopack
 npm run smoke        # build + start + assert /api/health responds
 npm run eval         # Layer-1 deterministic eval, emits JSON on stdout
 ```
+
+The production build runs on **Turbopack** (`next build --turbopack`). The
+webpack builder was observed crashing non-deterministically during content
+hashing (`TypeError: Cannot read properties of undefined (reading 'length')` in
+webpack's `WasmHash`), which took down `npm run smoke` and `npm run eval` with
+it. Turbopack does not use that code path. The webpack builder is still
+reachable as `npm run build:webpack` for comparison/debugging.
 
 ---
 
