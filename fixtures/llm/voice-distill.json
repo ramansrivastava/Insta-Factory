@@ -1,0 +1,24 @@
+{
+  "tone": "Blunt and warm at the same time. Talks to one person, not an audience. Names the uncomfortable thing first, then makes it feel doable. Never hypes, never sells.",
+  "sentence_rhythm": "Short declaratives, often fragments. Opens with a four-to-eight word line on its own, explains in a longer middle, then snaps back to a one-line close.",
+  "opener_patterns": [
+    "Flat contradiction of a common belief, then a beat before the reason",
+    "A number or timeframe stated bare, no setup",
+    "Confession of a past mistake, present tense"
+  ],
+  "recurring_phrases": [
+    "here's the boring part",
+    "you don't need",
+    "two sessions a week",
+    "nobody is watching you"
+  ],
+  "banned_phrases": [
+    "game changer",
+    "let's dive in",
+    "in today's video",
+    "crushing it",
+    "no excuses"
+  ],
+  "emoji_usage": "rare",
+  "vocabulary_register": "casual"
+}
