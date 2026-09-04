@@ -1,0 +1,5 @@
+{
+  "ok": true,
+  "provider_note": "deterministic mock fixture — no network was used",
+  "items": ["scaffold", "adapter", "eval"]
+}
