@@ -9,12 +9,20 @@
  * matching the shape the factory's `eval/score.py` harness consumes. Human-
  * readable progress goes to stderr so stdout stays machine-parseable.
  *
- * Phase 1 ships the harness plus two live dimensions:
- *   - schema_validity: the LLM seam produces schema-valid structured output
- *   - smoke_passes:    the primary entry point builds, starts and answers
+ * Seven live dimensions:
+ *   - schema_validity:      the LLM seam produces schema-valid structured output
+ *   - smoke_passes:         the primary entry point builds, starts and answers
+ *   - hook_count:           the core loop returns exactly the hooks asked for
+ *   - hook_distinctiveness: every hook takes a different angle
+ *   - banned_phrases:       nothing the creator has banned appears in the output
+ *   - section_completeness: the script has a hook, a body and a CTA
+ *   - groundedness:         no number, name or claim the idea does not support
  *
- * Phases 3-5 add hook_count, hook_distinctiveness, banned_phrases,
- * section_completeness and groundedness as those checks become meaningful.
+ * The five product dimensions all come from a single run of the real pipeline
+ * (`lib/generate/pipeline.ts`) — the same code path the CLI and the API route
+ * use, on the deterministic mock adapter. They are gates, not scores: each is 1
+ * or 0. Judging whether the writing is any *good* is Layer 2's job (Phase 7),
+ * and the only ground truth for that is Layer 3's accept/edit/discard data.
  *
  * Usage:
  *   node scripts/eval/run.mjs
@@ -107,10 +115,80 @@ function smokePasses() {
   };
 }
 
+/**
+ * Runs the core loop once and returns its five deterministic checks, keyed by
+ * name.
+ *
+ * One generation feeds all five dimensions — running the pipeline five times
+ * would be five times the latency for identical output. On the mock adapter
+ * the answer comes from `fixtures/llm/`, which is why `SAMPLE_IDEA` is the idea
+ * used here: the fixtures are written to be grounded in exactly those words.
+ */
+async function runCoreLoop() {
+  const { generate } = await import(path.join(ROOT, "lib/generate/pipeline.ts"));
+  const { runLayer1Checks } = await import(path.join(ROOT, "lib/generate/checks.ts"));
+  const { SAMPLE_IDEA } = await import(path.join(ROOT, "lib/generate/sample.ts"));
+  const { loadVoiceProfile } = await import(path.join(ROOT, "lib/voice/store.ts"));
+  const { DEFAULT_HOOK_COUNT } = await import(path.join(ROOT, "types/generation.ts"));
+
+  const { profile } = loadVoiceProfile({ fallbackToExample: true });
+  const hookCount = DEFAULT_HOOK_COUNT;
+
+  const result = await generate({ idea: SAMPLE_IDEA, profile, hookCount });
+  const checks = runLayer1Checks({
+    idea: SAMPLE_IDEA,
+    hooks: result.hooks,
+    script: result.script,
+    hookCount,
+    bannedPhrases: profile.traits.banned_phrases,
+  });
+
+  return new Map(checks.map((check) => [check.name, check]));
+}
+
+/**
+ * Turns one already-computed check into a dimension. The generation is shared,
+ * so a failure to generate at all fails every product dimension rather than
+ * silently passing four of them.
+ * @param {Map<string, {passed: boolean, score: number, details: string}> | Error} loop
+ * @param {string} name
+ */
+function fromCoreLoop(loop, name) {
+  if (loop instanceof Error) {
+    return { passed: false, details: `generation failed: ${loop.message}` };
+  }
+  const check = loop.get(name);
+  if (!check) {
+    return { passed: false, details: `no check named "${name}" was produced` };
+  }
+  return { passed: check.passed, score: check.score, details: check.details };
+}
+
 async function main() {
+  process.stderr.write("[eval] running the core loop once for the product dimensions ...\n");
+  /** @type {Map<string, {passed: boolean, score: number, details: string}> | Error} */
+  let loop;
+  try {
+    loop = await runCoreLoop();
+  } catch (error) {
+    loop = error instanceof Error ? error : new Error(String(error));
+    process.stderr.write(`[eval] core loop errored: ${loop.message}\n`);
+  }
+
   const results = [
-    await runDimension("schema_validity", 0.5, schemaValidity),
-    await runDimension("smoke_passes", 0.5, async () => smokePasses()),
+    await runDimension("schema_validity", 0.15, schemaValidity),
+    await runDimension("smoke_passes", 0.15, async () => smokePasses()),
+    await runDimension("hook_count", 0.1, async () => fromCoreLoop(loop, "hook_count")),
+    await runDimension("hook_distinctiveness", 0.15, async () =>
+      fromCoreLoop(loop, "hook_distinctiveness"),
+    ),
+    await runDimension("banned_phrases", 0.15, async () =>
+      fromCoreLoop(loop, "banned_phrases"),
+    ),
+    await runDimension("section_completeness", 0.15, async () =>
+      fromCoreLoop(loop, "section_completeness"),
+    ),
+    await runDimension("groundedness", 0.15, async () => fromCoreLoop(loop, "groundedness")),
   ];
 
   process.stdout.write(`${JSON.stringify({ results }, null, 2)}\n`);

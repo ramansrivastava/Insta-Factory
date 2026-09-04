@@ -1,0 +1,24 @@
+{
+  "hooks": [
+    {
+      "text": "You don't need five days a week. You need two you'll actually keep.",
+      "angle": "contrarian",
+      "rationale": "Contradicts the split-first belief this audience already holds, and does it in one breath without hedging."
+    },
+    {
+      "text": "The program isn't the problem. The version of you who had six free hours is.",
+      "angle": "pain_point",
+      "rationale": "Names the frustration the viewer is currently living in — the abandoned plan — without blaming them for it."
+    },
+    {
+      "text": "Here's the boring part nobody tells you about training twice a week.",
+      "angle": "curiosity_gap",
+      "rationale": "Opens a gap and uses one of the creator's own signature openers, so the hook already sounds like her."
+    },
+    {
+      "text": "Week three, and the split I saved in my calendar is still sitting there untouched.",
+      "angle": "story_cold_open",
+      "rationale": "Drops into the moment the idea describes, present tense, so the viewer recognises themselves before any argument starts."
+    }
+  ]
+}
