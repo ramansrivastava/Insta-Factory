@@ -1,0 +1,79 @@
+{
+  "id": "product-guide-preorder",
+  "format": "product",
+  "split": "held_out",
+  "covers": "Held-out product post whose selling point is that the thing is small — the case most likely to be inflated into a bigger promise.",
+  "idea": "Open preorders for the short guide I wrote about training around a full-time job. It is short on purpose, it costs less than a coffee, and it is the same two-day week I have been posting about for a year with the parts nobody asks about filled in.",
+  "hook_count": 3,
+  "offline": {
+    "hooks": [
+      {
+        "text": "It's short on purpose. That's the feature.",
+        "angle": "contrarian",
+        "rationale": "Contradicts the assumption that more pages means more value."
+      },
+      {
+        "text": "The parts nobody asks about are the parts that decide whether this works.",
+        "angle": "curiosity_gap",
+        "rationale": "Opens the gap on the contents without listing them."
+      },
+      {
+        "text": "You have a full-time job and every plan you find assumes you don't.",
+        "angle": "pain_point",
+        "rationale": "Names the frustration in the viewer's own terms."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "It's short on purpose. That's the feature."
+        },
+        {
+          "kind": "setup",
+          "text": "I wrote a guide about training around a full-time job, and then I cut most of it."
+        },
+        {
+          "kind": "body",
+          "text": "It's the same two-day week I have been posting about for a year, with the parts nobody asks about filled in. What to do on the week you miss a session. How to add weight without wrecking the next one. What to cut when the job takes your evening. It costs less than a coffee, because a long book you never finish is worth less than a short one you do."
+        },
+        {
+          "kind": "payoff",
+          "text": "You get the whole method in one sitting, and you start on your next training day."
+        },
+        {
+          "kind": "cta",
+          "text": "Preorders are open. Read it in one sitting, then go and train."
+        }
+      ],
+      "claims": [
+        {
+          "text": "The guide covers training around a full-time job.",
+          "grounded_in": "the short guide I wrote about training around a full-time job"
+        },
+        {
+          "text": "It costs less than a coffee.",
+          "grounded_in": "it costs less than a coffee"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 4,
+        "evidence": "Plain and unsold in the profile's register, though \"worth less than a short one you do\" is a neater turn than the profile usually makes."
+      },
+      "hook_distinctiveness": {
+        "score": 3,
+        "evidence": "Three real angles, but the contrarian hook and the pain hook are close enough that the middle option is doing little work."
+      },
+      "script_completeness": {
+        "score": 5,
+        "evidence": "The body names the actual contents and the close asks for one specific sequence."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "No page count, no launch price, no bonus material — only what the idea contains."
+      }
+    }
+  }
+}

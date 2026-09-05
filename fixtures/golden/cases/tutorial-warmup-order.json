@@ -1,0 +1,75 @@
+{
+  "id": "tutorial-warmup-order",
+  "format": "tutorial",
+  "split": "held_out",
+  "covers": "Held-out tutorial with a negative instruction in it — the prompts must not be tuned to make this one score.",
+  "idea": "Explain the order to warm up in so the first working set is not a write-off: five minutes of easy movement, then the exact lift you are about to do at an empty bar, then two build-up sets. Skip the stretching routine, it is not doing what you think it is doing.",
+  "hook_count": 3,
+  "offline": {
+    "hooks": [
+      {
+        "text": "Your stretching routine is not a warm-up.",
+        "angle": "contrarian",
+        "rationale": "Contradicts the habit the viewer is defending, plainly and without hedging."
+      },
+      {
+        "text": "The first working set tells you whether you warmed up right, and by then it's too late.",
+        "angle": "curiosity_gap",
+        "rationale": "Opens the gap on the order without stating it."
+      },
+      {
+        "text": "You waste the first set of every session and call it a warm-up.",
+        "angle": "pain_point",
+        "rationale": "The frustration named in the viewer's own terms."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "Your stretching routine is not a warm-up."
+        },
+        {
+          "kind": "setup",
+          "text": "It feels productive, and it does almost nothing for the set you are about to do."
+        },
+        {
+          "kind": "body",
+          "text": "Five minutes of easy movement, enough to get warm. Then the exact lift you are about to do, at an empty bar, for a set that feels stupidly light. Then two build-up sets on the way to your working weight. That's it, that's the whole thing."
+        },
+        {
+          "kind": "payoff",
+          "text": "The first working set stops being the one you write off and starts being one that counts."
+        },
+        {
+          "kind": "cta",
+          "text": "Run that order for one session and see what the first set feels like."
+        }
+      ],
+      "claims": [
+        {
+          "text": "The warm-up is easy movement, then an empty bar, then two build-up sets.",
+          "grounded_in": "five minutes of easy movement, then the exact lift you are about to do at an empty bar, then two build-up sets"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 5,
+        "evidence": "Opens with a flat contradiction and closes on one line, and \"that's it, that's the whole thing\" is used where it belongs."
+      },
+      "hook_distinctiveness": {
+        "score": 4,
+        "evidence": "Three genuinely different promises, though the gap hook and the pain hook both circle the wasted first set."
+      },
+      "script_completeness": {
+        "score": 5,
+        "evidence": "The body is the full ordered procedure and the close asks for one specific session."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "The order and the instruction to skip stretching are both the creator's; nothing was added."
+      }
+    }
+  }
+}
