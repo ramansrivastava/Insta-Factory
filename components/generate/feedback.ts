@@ -46,6 +46,18 @@ export function isEditTooLong(editedText: string): boolean {
 }
 
 /**
+ * True when there is no rewrite to send yet.
+ *
+ * The API rejects an `edited` outcome with no text, because a record saying
+ * "she rewrote it" without the rewrite is a permanently unrepairable hole in
+ * the only ground truth this product collects. So the button stays disabled
+ * until there is something to save, rather than letting the click fail.
+ */
+export function isEditEmpty(editedText: string): boolean {
+  return editedText.trim().length === 0;
+}
+
+/**
  * What to say once a choice has landed. Three outcomes get three different
  * confirmations rather than one "Thanks!", because the creator should be able
  * to tell at a glance which of five hooks they already rated.

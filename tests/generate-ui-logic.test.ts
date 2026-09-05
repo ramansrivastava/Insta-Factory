@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildFeedbackPayload,
+  isEditEmpty,
+  isEditTooLong,
+} from "@/components/generate/feedback.ts";
+import {
   isClaimUnverified,
   renderScriptForClipboard,
 } from "@/components/generate/script-text.ts";
 import { MIN_IDEA_LENGTH as PIPELINE_MIN } from "@/lib/generate/pipeline.ts";
 import { MIN_IDEA_LENGTH as IDEA_MIN } from "@/lib/generate/idea.ts";
 import { GenerateRequestSchema, HOOK_COUNT_OPTIONS } from "@/types/api.ts";
+import { FeedbackRequestSchema, MAX_EDITED_TEXT_LENGTH } from "@/types/feedback.ts";
 import { MAX_HOOKS, MIN_HOOKS, type Script } from "@/types/generation.ts";
 
 /**
@@ -101,5 +107,36 @@ describe("the API contract the UI is built against", () => {
     const parsed = GenerateRequestSchema.safeParse({ idea: `   ${idea}   ` });
     expect(parsed.success).toBe(true);
     expect(parsed.success && parsed.data.idea).toBe(idea);
+  });
+});
+
+describe("the feedback buttons' rules", () => {
+  const subject = { generationId: "gen-1", target: "hook" as const, hookIndex: 0 };
+
+  it("holds the edit back until there is a rewrite to send", () => {
+    // The API refuses an `edited` outcome with no text, so the button that
+    // would produce that request has to be disabled rather than fail.
+    expect(isEditEmpty("")).toBe(true);
+    expect(isEditEmpty("   \n ")).toBe(true);
+    expect(isEditEmpty("What I said instead.")).toBe(false);
+    expect(isEditTooLong("x".repeat(MAX_EDITED_TEXT_LENGTH + 1))).toBe(true);
+  });
+
+  it("attaches the rewrite only to an edited outcome", () => {
+    expect(buildFeedbackPayload(subject, "edited", "  My version.  ")).toEqual({
+      generationId: "gen-1",
+      target: "hook",
+      hookIndex: 0,
+      outcome: "edited",
+      editedText: "My version.",
+    });
+    expect(
+      buildFeedbackPayload(subject, "discarded", "abandoned rewrite"),
+    ).not.toHaveProperty("editedText");
+  });
+
+  it("builds a payload the API will accept", () => {
+    const payload = buildFeedbackPayload(subject, "edited", "My version.");
+    expect(FeedbackRequestSchema.safeParse(payload).success).toBe(true);
   });
 });

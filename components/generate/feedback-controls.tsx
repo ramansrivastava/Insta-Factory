@@ -12,6 +12,7 @@ import {
 import {
   buildFeedbackPayload,
   confirmationFor,
+  isEditEmpty,
   isEditTooLong,
   type FeedbackSubject,
 } from "./feedback.ts";
@@ -28,7 +29,9 @@ import {
  * Hence: three buttons, one optional box, no modal, no star rating, no "tell us
  * more". "Edited" reveals a textarea because the rewrite is the most valuable
  * record here (it is a labelled pair: what we wrote, what she says instead),
- * but it can be saved empty — the outcome alone is worth having.
+ * and it cannot be saved empty: an "edited" record with no rewrite is a hole
+ * in the only ground truth this collects, and nothing later can fill it in.
+ * "Discarded" is the button for a hook that was rewritten out of existence.
  */
 
 type Status = "idle" | "saving" | "saved" | "failed";
@@ -47,6 +50,7 @@ export function FeedbackControls({
   const [status, setStatus] = useState<Status>("idle");
 
   const tooLong = isEditTooLong(editedText);
+  const empty = isEditEmpty(editedText);
   const busy = status === "saving";
 
   async function send(outcome: FeedbackOutcome, text: string) {
@@ -138,7 +142,7 @@ export function FeedbackControls({
             <button
               type="button"
               onClick={() => void send("edited", editedText)}
-              disabled={busy || tooLong}
+              disabled={busy || tooLong || empty}
               className="rounded-md border border-zinc-600 px-2.5 py-1 text-xs font-medium text-zinc-200 transition-colors hover:border-zinc-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {busy ? "Saving…" : "Save edit"}
@@ -150,7 +154,9 @@ export function FeedbackControls({
               </span>
             ) : (
               <span className="text-xs text-zinc-600">
-                Saving with the box empty still records the edit.
+                {empty
+                  ? "Paste your version to save it — or press Discarded if you kept none of it."
+                  : "Your version is what makes the next one better."}
               </span>
             )}
           </div>

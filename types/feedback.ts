@@ -55,7 +55,7 @@ export const FeedbackRequestSchema = z
     /** Which hook, zero-based. Required for `target: "hook"`, absent otherwise. */
     hookIndex: z.number().int().min(0).max(MAX_HOOKS - 1).optional(),
     outcome: FeedbackOutcomeSchema,
-    /** The creator's rewrite. Only meaningful on `edited`, and never required. */
+    /** The creator's rewrite. Required on `edited`, and meaningless otherwise. */
     editedText: z
       .string()
       .trim()
@@ -68,6 +68,20 @@ export const FeedbackRequestSchema = z
   .refine((body) => (body.target === "hook") === (body.hookIndex !== undefined), {
     message: "hookIndex is required for a hook and must be omitted for the script.",
     path: ["hookIndex"],
+  })
+  /**
+   * An `edited` outcome without the text is a hole in the ground truth, not a
+   * thinner version of it: downstream there is no way to tell "she rewrote it
+   * and we lost what she wrote" apart from a genuine record. The rewrite is
+   * the whole point of the outcome, so refuse the record rather than store one
+   * that can never be repaired — the trace is append-only and no backfill is
+   * possible after the tab is closed. `discarded` is the outcome for "kept
+   * nothing"; `used_as_is` for "changed nothing".
+   */
+  .refine((body) => body.outcome !== "edited" || (body.editedText ?? "").length > 0, {
+    message:
+      "editedText is required for an edited outcome — record discarded instead if nothing was kept.",
+    path: ["editedText"],
   });
 
 export type FeedbackRequest = z.infer<typeof FeedbackRequestSchema>;
