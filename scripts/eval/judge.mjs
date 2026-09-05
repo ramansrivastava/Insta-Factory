@@ -36,6 +36,7 @@
  *   node scripts/eval/judge.mjs --no-judge            # Layer-1 over the set
  *   node scripts/eval/judge.mjs --json                # {"results":[...]}
  *   node scripts/eval/judge.mjs --dimension voice_match
+ *   node scripts/eval/judge.mjs --dimension voice_match --score-only
  *
  * Environment:
  *   JUDGE_MODEL    model that grades (separate from LLM_MODEL, on purpose)
@@ -72,6 +73,10 @@ const USAGE = `node scripts/eval/judge.mjs [options]
   --dimension <name>         Print one project dimension as JSON, for the
                              \`## Project Eval\` binding in factory.md.
                              One of: ${PROJECT_DIMENSIONS.join(", ")}.
+  --score-only               With --dimension: print only
+                             {"score": <0.0-1.0>, "details": "..."} on one
+                             line, and nothing else. The shape the factory's
+                             project-eval runner execs and parses directly.
   --no-judge                 Skip the judge call. Only the deterministic
                              dimensions are reported.
   --json                     Emit {"results":[...]} instead of the report.
@@ -79,7 +84,15 @@ const USAGE = `node scripts/eval/judge.mjs [options]
 
 /** @param {string[]} argv */
 function parseArgs(argv) {
-  const args = { split: null, ids: [], dimension: null, json: false, withJudge: true, help: false };
+  const args = {
+    split: null,
+    ids: [],
+    dimension: null,
+    json: false,
+    scoreOnly: false,
+    withJudge: true,
+    help: false,
+  };
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -105,6 +118,8 @@ function parseArgs(argv) {
       args.withJudge = false;
     } else if (arg === "--json") {
       args.json = true;
+    } else if (arg === "--score-only") {
+      args.scoreOnly = true;
     } else if (arg === "--help" || arg === "-h") {
       args.help = true;
     } else {
@@ -144,8 +159,15 @@ function weightsFor(dimensionCount, judgeDimensionCount) {
   };
 }
 
+// `--score-only` is exec'd by a machine that reads one line and nothing else,
+// so the running commentary is muted there. Fatal errors are not: they go to
+// stderr regardless, because a silent failure and an empty stdout is the
+// hardest kind of broken to diagnose from the other side of a subprocess.
+let muted = false;
+
 /** @param {string} line */
 function note(line) {
+  if (muted) return;
   process.stderr.write(`${line}\n`);
 }
 
@@ -216,6 +238,11 @@ async function main() {
     return;
   }
 
+  if (args.scoreOnly && !args.dimension) {
+    throw new Error("--score-only reports a single dimension, so it needs --dimension <name>.");
+  }
+  muted = args.scoreOnly;
+
   const dimensions = selectedDimensions(args);
   if (dimensions.length === 0) {
     throw new Error(
@@ -261,6 +288,16 @@ async function main() {
     );
   }
 
+  // The project-eval runner execs this command directly — no shell, no pipes —
+  // and parses stdout as one flat object. A failing dimension is reported as a
+  // score below 1, not as a non-zero exit: a crashed command and a low score
+  // mean different things to the runner, and only the first is an error here.
+  if (args.scoreOnly) {
+    const [result] = results;
+    process.stdout.write(`${JSON.stringify({ score: result.score, details: result.details })}\n`);
+    return;
+  }
+
   process.stdout.write(`${JSON.stringify({ results }, null, 2)}\n`);
   process.exitCode = results.every((result) => result.passed) ? 0 : 1;
 }
@@ -268,6 +305,6 @@ async function main() {
 try {
   await main();
 } catch (error) {
-  note(`[judge] ${error instanceof Error ? error.message : String(error)}`);
+  process.stderr.write(`[judge] ${error instanceof Error ? error.message : String(error)}\n`);
   process.exitCode = 1;
 }
