@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { CheckResult } from "../lib/generate/checks.ts";
+
 /**
  * The shapes the core loop produces: N structurally distinct hooks, and a
  * sectioned script that is grounded in the creator's own idea.
@@ -134,6 +136,13 @@ export const ScriptSchema = z.object({
 export type Script = z.infer<typeof ScriptSchema>;
 
 export interface GenerationMeta {
+  /**
+   * The trace id every log line and the JSONL record for this run carry, and
+   * the key `POST /api/feedback` joins an accept/edit/discard on. Surfaced to
+   * the client on purpose: a rating the browser cannot attach to a generation
+   * is a rating of nothing.
+   */
+  generationId: string;
   model: string;
   provider: string;
   /**
@@ -148,5 +157,14 @@ export interface GenerationMeta {
 export interface GenerationResult {
   hooks: Hook[];
   script: Script;
+  /**
+   * Layer-1 verdicts for this run. Computed by the pipeline so that every real
+   * generation leaves a per-check record behind, not just the ones an eval
+   * harness happens to look at.
+   *
+   * `CheckResult` is imported as a type only, so this module still pulls no
+   * filesystem or LLM code into the browser bundle.
+   */
+  checks: CheckResult[];
   meta: GenerationMeta;
 }

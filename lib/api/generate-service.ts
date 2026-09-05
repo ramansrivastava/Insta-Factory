@@ -1,4 +1,5 @@
 import { generate } from "../generate/pipeline.ts";
+import { errorFields, generationLogger, newGenerationId } from "../log.ts";
 import { LlmSchemaError, LlmTruncatedError } from "../llm/errors.ts";
 import type { LlmAdapter } from "../llm/types.ts";
 import { loadVoiceProfile } from "../voice/store.ts";
@@ -33,6 +34,12 @@ export interface RunGenerationOptions {
   env?: Record<string, string | undefined>;
   /** Repo root the voice profile is read from. Injected by tests. */
   root?: string;
+  /**
+   * Trace id minted by the caller at request entry. Passed down so the retry,
+   * the two model calls and the JSONL record all share one id — a retry that
+   * logged under a fresh id would read as two unrelated generations.
+   */
+  generationId?: string;
 }
 
 /**
@@ -49,11 +56,20 @@ function isRetryable(error: unknown): boolean {
 export async function runGeneration(
   options: RunGenerationOptions,
 ): Promise<GenerateSuccessBody> {
+  const generationId = options.generationId ?? newGenerationId();
+  const log = generationLogger(generationId);
+
   // A fresh checkout has no data/voice-profile.json — it is gitignored personal
   // data — so fall back to the committed example rather than refusing to
   // generate. `usedExampleProfile` carries that fact to the UI so the creator
   // is told whose voice they are reading.
   const loaded = loadVoiceProfile({ fallbackToExample: true, root: options.root });
+  if (loaded.usedExample) {
+    log.warn(
+      { event: "profile.fallback", path: loaded.path },
+      "no saved voice profile — generating in the example profile's voice",
+    );
+  }
 
   let lastError: unknown;
 
@@ -65,6 +81,7 @@ export async function runGeneration(
         hookCount: options.hookCount,
         adapter: options.adapter,
         env: options.env,
+        generationId,
       });
 
       return {
@@ -84,11 +101,16 @@ export async function runGeneration(
     } catch (error) {
       lastError = error;
       if (attempt < MAX_ATTEMPTS && isRetryable(error)) {
-        console.warn(
-          `[generate] attempt ${attempt} produced an unusable structure (${error instanceof Error ? error.message : String(error)}); retrying once.`,
+        log.warn(
+          { event: "generation.retry", attempt, max_attempts: MAX_ATTEMPTS, err: errorFields(error) },
+          "attempt produced an unusable structure — retrying once",
         );
         continue;
       }
+      log.error(
+        { event: "generation.failed", attempt, err: errorFields(error) },
+        "generation failed",
+      );
       throw error;
     }
   }

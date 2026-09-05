@@ -1,6 +1,7 @@
 import type { Claim, Script } from "@/types/generation.ts";
 
 import { CopyButton } from "./copy-button.tsx";
+import { FeedbackControls } from "./feedback-controls.tsx";
 import {
   isClaimUnverified,
   renderScriptForClipboard,
@@ -15,7 +16,15 @@ import {
  * live in `./script-text.ts` so they can be unit tested without a renderer.
  */
 
-export function ScriptView({ script, idea }: { script: Script; idea: string }) {
+export function ScriptView({
+  script,
+  idea,
+  generationId,
+}: {
+  script: Script;
+  idea: string;
+  generationId: string;
+}) {
   return (
     <section aria-labelledby="script-heading" className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
@@ -61,6 +70,16 @@ export function ScriptView({ script, idea }: { script: Script; idea: string }) {
       </div>
 
       {script.claims.length > 0 ? <ClaimList claims={script.claims} idea={idea} /> : null}
+
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
+        <p className="mb-2 text-sm text-zinc-400">
+          Once you have recorded this: did you use the script as written?
+        </p>
+        <FeedbackControls
+          subject={{ generationId, target: "script" }}
+          label="this script"
+        />
+      </div>
     </section>
   );
 }

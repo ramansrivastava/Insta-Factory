@@ -18,11 +18,13 @@
     "smoke": "bash scripts/smoke.sh",
     "eval": "node scripts/eval/run.mjs",
     "generate": "node scripts/generate.mjs",
-    "voice:distill": "node scripts/voice/distill.mjs"
+    "voice:distill": "node scripts/voice/distill.mjs",
+    "generations:summary": "node scripts/generations/summary.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",
     "next": "^15.5.25",
+    "pino": "^10.3.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "zod": "^4.5.4"

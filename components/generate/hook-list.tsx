@@ -1,6 +1,7 @@
 import { HOOK_ANGLE_LABELS, type Hook } from "@/types/generation.ts";
 
 import { CopyButton } from "./copy-button.tsx";
+import { FeedbackControls } from "./feedback-controls.tsx";
 
 /**
  * The hook options, one per angle.
@@ -9,8 +10,19 @@ import { CopyButton } from "./copy-button.tsx";
  * schema carries, because the label is the reason to pick one: the creator is
  * choosing between "Contrarian" and "Curiosity gap", not between
  * `contrarian` and `curiosity_gap`.
+ *
+ * Each hook carries its own accept/edit/discard control. Per hook rather than
+ * per generation on purpose: the creator picks one of five and bins the rest,
+ * and "which of these five did she take" is the entire signal — a single rating
+ * for the batch would average it away.
  */
-export function HookList({ hooks }: { hooks: Hook[] }) {
+export function HookList({
+  hooks,
+  generationId,
+}: {
+  hooks: Hook[];
+  generationId: string;
+}) {
   return (
     <section aria-labelledby="hooks-heading" className="flex flex-col gap-3">
       <h2 id="hooks-heading" className="text-lg font-semibold tracking-tight">
@@ -32,6 +44,13 @@ export function HookList({ hooks }: { hooks: Hook[] }) {
                 <p className="text-sm text-zinc-500">{hook.rationale}</p>
               </div>
               <CopyButton text={hook.text} label="Copy hook" />
+            </div>
+
+            <div className="mt-3 border-t border-zinc-800 pt-3">
+              <FeedbackControls
+                subject={{ generationId, target: "hook", hookIndex: index }}
+                label={`hook ${index + 1}`}
+              />
             </div>
           </li>
         ))}
