@@ -1,4 +1,5 @@
 import { getAdapter } from "../llm/index.ts";
+import { normalizeIdea } from "./idea.ts";
 import type { LlmAdapter, StructuredResult } from "../llm/types.ts";
 import { assertHookCount, buildHooksRequest } from "../prompts/hooks.ts";
 import { buildScriptRequest } from "../prompts/script.ts";
@@ -25,14 +26,17 @@ import {
  * call 1's cache.
  */
 
-export const MIN_IDEA_LENGTH = 12;
-
-export class GenerationInputError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "GenerationInputError";
-  }
-}
+/**
+ * Idea bounds and normalisation live in `./idea.ts` so the browser can import
+ * them without pulling the LLM adapters in. Re-exported here because this is
+ * where callers expect to find them.
+ */
+export {
+  GenerationInputError,
+  MAX_IDEA_LENGTH,
+  MIN_IDEA_LENGTH,
+  normalizeIdea,
+} from "./idea.ts";
 
 export interface GenerateInput {
   idea: string;
@@ -41,16 +45,6 @@ export interface GenerateInput {
   /** Injected by tests; production resolves the adapter from the environment. */
   adapter?: LlmAdapter;
   env?: Record<string, string | undefined>;
-}
-
-export function normalizeIdea(idea: string): string {
-  const trimmed = (idea ?? "").trim();
-  if (trimmed.length < MIN_IDEA_LENGTH) {
-    throw new GenerationInputError(
-      `An idea needs at least ${MIN_IDEA_LENGTH} characters to elaborate on; got ${trimmed.length}. The generator adds structure to what you supply — it does not invent the substance.`,
-    );
-  }
-  return trimmed;
 }
 
 /**
