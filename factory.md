@@ -89,15 +89,15 @@ Build an Instagram Creator OS whose v1 core loop is idea-in -> hooks + script ou
 - Every generation path must be runnable end-to-end from the primary entry point without manual glue steps.
 - LLM provider credentials are read from the environment; never hardcode them and never commit a populated .env.
 - Prefer one obvious entry point over several partial ones — a new contributor should be able to run the core loop from the README in under five minutes.
-- The tech stack is not yet fixed. Once tech stack research concludes, update the Eval and Smoke Test sections and re-run `factory discover` + `factory init` to refresh eval dimensions.
 
 ## Eval
 
 ### Command
 
 <!-- eval/score.py is the generated harness; it emits {"results": [...]} JSON on stdout. -->
-<!-- Its dimensions are placeholders (fallback tier, confidence 0.2) pending the stack decision. -->
-<!-- After the stack is chosen, re-run `factory discover` to regenerate real dimensions. -->
+<!-- Tech stack (Next.js/TypeScript) was fixed at Phase 1. As of Phase 7, real project-eval -->
+<!-- dimensions are wired via the `## Project Eval` section below (golden-set + judge layer), -->
+<!-- moving the eval profile off the fallback tier. -->
 
 ```
 python3 eval/score.py
@@ -129,19 +129,38 @@ master
 
 ## Project Eval
 
-<!-- Layer 2: the twelve-case golden set in fixtures/golden/, run through the real -->
-<!-- pipeline and graded by scripts/eval/judge.mjs. Each command prints -->
-<!-- {"results":[{name,score,weight,passed,details}]} on stdout and exits non-zero on failure. -->
+<!-- Layer 2: the twelve-case golden set in fixtures/golden/, run through the real pipeline -->
+<!-- and graded by scripts/eval/judge.mjs. Each command below uses --score-only, which prints -->
+<!-- exactly one line, {"score": <0.0-1.0>, "details": "<string>"} — the flat shape the -->
+<!-- factory's project-eval runner requires (it execs the command directly, no shell/pipes, -->
+<!-- and parses stdout as that exact object). The bare (non --score-only) {"results":[...]} -->
+<!-- wrapper shape is still used by `node scripts/eval/run.mjs --with-judge` for local/manual runs. -->
 <!-- Every score is a pass RATE over the golden set, never a quality average: the judge is a -->
 <!-- triage signal that catches clearly-broken output, and it is never used to rank one run -->
 <!-- above another. See docs/eval.md. -->
 
-- hook_distinctiveness: `node scripts/eval/judge.mjs --dimension hook_distinctiveness` — every hook in a set takes a different angle, on all twelve golden cases
-- voice_match: `node scripts/eval/judge.mjs --dimension voice_match` — no banned phrase appears, and the judge's voice_fidelity clears its 3/5 floor, on all twelve golden cases
-- script_completeness: `node scripts/eval/judge.mjs --dimension script_completeness` — every generated script carries a hook, a body and a CTA
-- groundedness: `node scripts/eval/judge.mjs --dimension groundedness` — no number, name or attributed claim appears that the creator's idea does not support
+- name: hook_distinctiveness
+  command: node scripts/eval/judge.mjs --dimension hook_distinctiveness --score-only
+  parse: json
+  weight: 0.25
+  description: every hook in a set takes a different angle, on all twelve golden cases
+- name: voice_match
+  command: node scripts/eval/judge.mjs --dimension voice_match --score-only
+  parse: json
+  weight: 0.25
+  description: no banned phrase appears, and the judge's voice_fidelity clears its 3/5 floor, on all twelve golden cases
+- name: script_completeness
+  command: node scripts/eval/judge.mjs --dimension script_completeness --score-only
+  parse: json
+  weight: 0.25
+  description: every generated script carries a hook, a body and a CTA
+- name: groundedness
+  command: node scripts/eval/judge.mjs --dimension groundedness --score-only
+  parse: json
+  weight: 0.25
+  description: no number, name or attributed claim appears that the creator's idea does not support
 
-<!-- All four at once, plus the judge's own four dimensions: -->
+<!-- All four at once, plus the judge's own four dimensions (local/manual run, not used by the factory runner): -->
 
 ```
 node scripts/eval/run.mjs --with-judge
@@ -158,7 +177,6 @@ node scripts/eval/run.mjs --with-judge
 
 ## Notes
 
-- `## Project Eval` is defined as of Phase 7: four dimensions over a twelve-case golden set (eight tuning, four held out), three of them deterministic and one backed by a rubric judge. Re-run `factory discover` + `factory init` to move the eval profile off the fallback tier onto them.
+- `## Project Eval` was wired at Phase 7: four dimensions over a twelve-case golden set (eight tuning, four held out), three of them deterministic and one backed by a rubric judge. `factory discover` + `factory init` were re-run after this section landed to move the eval profile off the fallback tier onto them.
 - The judge is configured separately from the generator (`JUDGE_MODEL`, not `LLM_MODEL`) so a model never grades its own output, and its scores gate on a floor rather than ranking. Offline (`LLM_PROVIDER=mock`) both the generation and the judge answer from committed fixtures, so the project eval runs deterministically in CI without an API key.
 - No `## Research Configuration` was present in .factory/strategy/current.md at config time, so Research Target, Mutable/Fixed Surfaces (research), Inner Loop, and Outer Loop sections are intentionally omitted.
-- Eval profile at config time: tier=fallback, confidence=0.2, dimensions=syntax_check (0.83), observability (0.17), human_reviewed=false.
