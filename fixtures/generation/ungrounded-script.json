@@ -1,0 +1,36 @@
+{
+  "_comment": "Deliberately ungrounded. Every violation here is one the groundedness check must catch: a percentage, a plain number, a duration, a named institution, and a claim attributed to a span the idea does not contain. Read against SAMPLE_IDEA in lib/generate/sample.ts. Do not 'fix' this fixture — the test asserts it fails.",
+  "sections": [
+    {
+      "kind": "hook",
+      "text": "Studies show 73% of lifters quit within the first year.",
+      "on_screen_text": "73% quit"
+    },
+    {
+      "kind": "setup",
+      "text": "Researchers at the Stanford Sleep Lab followed people through their first year of training and found the same pattern every time."
+    },
+    {
+      "kind": "body",
+      "text": "The average lifter needs 45 minutes per session to see any adaptation, and spending $2,400 a year on a gym you visit twice does nothing. Two sessions a week is enough, but only if each one runs long enough to matter."
+    },
+    {
+      "kind": "payoff",
+      "text": "Once you stop chasing the five-day split, the plan stops getting abandoned."
+    },
+    {
+      "kind": "cta",
+      "text": "Put your two sessions in the calendar tonight."
+    }
+  ],
+  "claims": [
+    {
+      "text": "Most lifters quit within a year.",
+      "grounded_in": "a longitudinal study of first-year lifters"
+    },
+    {
+      "text": "Two sessions a week beats a five-day split you abandon.",
+      "grounded_in": "why two sessions a week beats a five-day split you abandon by week three"
+    }
+  ]
+}
