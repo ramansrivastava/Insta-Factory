@@ -3,10 +3,14 @@ import { z } from "zod";
 import { MAX_IDEA_LENGTH, MIN_IDEA_LENGTH } from "../lib/generate/idea.ts";
 import {
   DEFAULT_HOOK_COUNT,
+  HookSchema,
   MAX_HOOKS,
+  MAX_STEER_LENGTH,
   MIN_HOOKS,
+  RegenerationTargetSchema,
   type GenerationMeta,
   type Hook,
+  type RegenerationTarget,
   type Script,
 } from "./generation.ts";
 
@@ -52,6 +56,55 @@ export const GenerateRequestSchema = z.strictObject({
 export type GenerateRequest = z.infer<typeof GenerateRequestSchema>;
 
 /**
+ * The wire contract for `POST /api/regenerate`.
+ *
+ * The request carries the state, and the server keeps none. That is not
+ * laziness: the alternative is looking the parent generation up in the JSONL
+ * trace, which would turn an append-only analytics artefact into a read path
+ * the product depends on, and would break outright the moment `GENERATIONS_DIR`
+ * points at a volume or tracing is switched off. What is on the creator's
+ * screen is the truth about what they are regenerating away from, so that is
+ * what they send.
+ */
+export const RegenerateRequestSchema = z.strictObject({
+  target: RegenerationTargetSchema,
+  idea: GenerateRequestSchema.shape.idea,
+  hookCount: GenerateRequestSchema.shape.hookCount,
+  /**
+   * The generation this one replaces. Recorded on the new record, never read
+   * back — it exists so the trace can be walked as chains later.
+   */
+  parentGenerationId: z.string().trim().min(1, "parentGenerationId is required."),
+  /**
+   * For `target: "hooks"`, the hooks already shown and rejected, sent back as
+   * avoid-context. For `target: "script"`, the hooks currently on screen, which
+   * the new script must open with.
+   */
+  hooks: z.array(HookSchema).max(MAX_HOOKS).default([]),
+  /**
+   * One line, not a brief. Past this length it stops adjusting the voice
+   * profile and starts competing with it.
+   */
+  steer: z
+    .string()
+    .trim()
+    .max(
+      MAX_STEER_LENGTH,
+      `A steer is one line — at most ${MAX_STEER_LENGTH} characters. Say the one thing to change; anything longer belongs in the idea itself.`,
+    )
+    .optional(),
+}).refine(
+  (value) => value.target !== "script" || value.hooks.length > 0,
+  {
+    path: ["hooks"],
+    message:
+      "Regenerating the script needs the hooks it opens with — send the ones currently on screen.",
+  },
+);
+
+export type RegenerateRequest = z.infer<typeof RegenerateRequestSchema>;
+
+/**
  * Why the request did not produce a script. The UI branches on this rather
  * than on the status code, so a new failure mode can be given its own wording
  * without the client re-deriving meaning from a number.
@@ -91,6 +144,33 @@ export interface GenerateSuccessBody {
     profileWarnings: string[];
   };
 }
+
+/**
+ * Only the half that was re-run comes back. The other half is `null` rather
+ * than echoed, because echoing it would let a stale copy of the script arrive
+ * back at the browser looking like a fresh one.
+ */
+export interface RegenerateSuccessBody {
+  ok: true;
+  target: RegenerationTarget;
+  idea: string;
+  hookCount: number;
+  hooks: Hook[] | null;
+  script: Script | null;
+  /**
+   * The Layer-1 verdicts this run could answer — four for hooks, three for a
+   * script. Returned here and not on `/api/generate` because a regeneration is
+   * an explicit second opinion: the creator asked again, so whether the answer
+   * cleared the gates is part of the answer.
+   */
+  checks: { name: string; passed: boolean; score: number; details: string }[];
+  meta: GenerationMeta & {
+    usedExampleProfile: boolean;
+    profileWarnings: string[];
+  };
+}
+
+export type RegenerateResponseBody = RegenerateSuccessBody | GenerateErrorBody;
 
 export interface GenerateErrorBody {
   ok: false;

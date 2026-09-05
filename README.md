@@ -61,6 +61,26 @@ complete, but it is the fixture's content, so `groundedness` will correctly fail
 for any idea other than the built-in sample — the CLI says so when it happens.
 Set `ANTHROPIC_API_KEY` for output that actually responds to your idea.
 
+### Regenerate one half
+
+Hooks and the script are two separate model calls, so either can be re-run on
+its own. In the UI each half has its own **Regenerate** button with an optional
+one-line steer ("make them blunter", "lead with the mistake"); regenerating the
+hooks hands the model the ones you have already seen, so round two is a
+different set rather than the same lines reordered. From the CLI:
+
+```bash
+npm run --silent generate -- --hooks-only --json > hooks.json   # hooks, no script
+npm run generate -- --script-only --hooks-file hooks.json       # script for those hooks
+npm run generate -- --hooks-only --hooks-file hooks.json \
+  --steer "make them blunter"                                   # different hooks
+```
+
+The steer is appended after the cacheable voice prefix, so pressing regenerate
+repeatedly does not re-pay for the profile. Every regeneration is its own trace
+record carrying `parent_generation_id`, which is what makes "she had to ask
+twice" countable in `npm run generations:summary`.
+
 ### Verify everything works
 
 ```bash
@@ -135,6 +155,7 @@ fixtures/generation/     Check fixtures (incl. a deliberately ungrounded script)
 scripts/smoke.sh         End-to-end smoke test (build → start → /api/health)
 scripts/eval/run.mjs     Layer-1 deterministic eval harness
 scripts/generate.mjs     `npm run generate` — the core loop from the CLI
+                         (plus --hooks-only / --script-only for half a run)
 scripts/voice/distill.mjs  `npm run voice:distill`
 tests/                   Vitest unit tests
 ```

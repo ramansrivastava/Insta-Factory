@@ -6,11 +6,13 @@ import {
   MAX_HOOKS,
   MIN_HOOKS,
   hooksResultSchema,
+  type Hook,
   type HooksResult,
 } from "../../types/generation.ts";
 import {
   buildVoiceSystemBlocks,
   renderBannedReminder,
+  renderSteer,
   renderVoiceReminder,
 } from "./system.ts";
 
@@ -81,10 +83,42 @@ export function renderHooksInstructions(
   return lines.filter((line) => line !== null).join("\n");
 }
 
+/**
+ * The hooks the creator has already seen and rejected, handed back as explicit
+ * avoid-context.
+ *
+ * Without this, "regenerate hooks" is a reshuffle: the same idea, the same
+ * profile and the same angle menu produce the same neighbourhood of lines, and
+ * round two reads as round one reworded. The rejected set is per-request, so it
+ * goes in the user turn — never in a cacheable block.
+ *
+ * The angles are named alongside the text on purpose. "Do not repeat these"
+ * reads to a model as "avoid these words"; naming the angle each rejected hook
+ * took says the more useful thing, which is that the *approach* was tried.
+ */
+export function renderAvoidHooks(hooks: readonly Hook[]): string {
+  if (hooks.length === 0) return "";
+
+  const rendered = hooks
+    .map((hook, index) => `${index + 1}. [${hook.angle}] ${hook.text}`)
+    .join("\n");
+
+  return [
+    "<already_shown>",
+    rendered,
+    "</already_shown>",
+    "I have already seen those and did not want them. Write genuinely different hooks: new openings, new framings, different sentences. Reusing an angle from that list is fine — rewording a line from it is not. If a line you are about to write is a paraphrase of one above, throw it out and find another way in.",
+  ].join("\n");
+}
+
 export interface HooksRequestInput {
   idea: string;
   profile: VoiceProfile;
   hookCount: number;
+  /** Previously-shown hooks to write away from. Regeneration only. */
+  avoid?: readonly Hook[];
+  /** The creator's optional one-line adjustment. Regeneration only. */
+  steer?: string;
 }
 
 export function buildHooksRequest(
@@ -93,11 +127,24 @@ export function buildHooksRequest(
   const hookCount = assertHookCount(input.hookCount);
   const idea = input.idea.trim();
 
+  // Everything below the system blocks is per-request. The order is the order
+  // the model reads it in: the brief, then what was rejected, then the nudge.
+  const userTurn = [
+    `Here is my raw idea for this Reel. Write the ${hookCount} hooks.`,
+    `<idea>\n${idea}\n</idea>`,
+    renderAvoidHooks(input.avoid ?? []),
+    renderSteer(input.steer),
+  ]
+    .filter((part) => part !== "")
+    .join("\n\n");
+
   return {
     kind: hooksRequestKind(hookCount),
     system: [
       ...buildVoiceSystemBlocks(input.profile),
       // Stable for this creator and this count; still no per-request content.
+      // The avoid list and the steer are deliberately absent from here — either
+      // one in a cacheable block invalidates the prefix on every regeneration.
       { text: renderHooksInstructions(hookCount, input.profile), cacheable: true },
     ],
     messages: [
@@ -105,7 +152,7 @@ export function buildHooksRequest(
         // After the last cache breakpoint, which is the whole reason the idea
         // lives in the user turn rather than in the system prompt.
         role: "user",
-        content: `Here is my raw idea for this Reel. Write the ${hookCount} hooks.\n\n<idea>\n${idea}\n</idea>`,
+        content: userTurn,
       },
     ],
     schema: hooksResultSchema(hookCount),

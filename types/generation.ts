@@ -135,6 +135,32 @@ export const ScriptSchema = z.object({
 });
 export type Script = z.infer<typeof ScriptSchema>;
 
+/**
+ * Which half of a generation a regeneration re-runs.
+ *
+ * The two-call pipeline is what makes this possible at all: hooks and script
+ * are separate model calls conditioned on separate prompts, so re-running one
+ * without the other is a matter of not making the second call rather than a
+ * rewrite. A single merged call would have made "give me different hooks" cost
+ * a whole new script.
+ */
+export const REGENERATION_TARGETS = ["hooks", "script"] as const;
+export const RegenerationTargetSchema = z.enum(REGENERATION_TARGETS);
+export type RegenerationTarget = z.infer<typeof RegenerationTargetSchema>;
+
+/**
+ * The optional one-line steer ("make this more casual", "lead with the
+ * mistake").
+ *
+ * Capped hard and deliberately low. This is a nudge appended to the user turn,
+ * not a second brief — the moment it grows into a paragraph it starts competing
+ * with the voice profile it is supposed to be adjusting, and this stops being
+ * "regenerate with a nudge" and becomes a prompt editor. Keeping it one line is
+ * also what keeps the feature cheap: the steer sits after the last cache
+ * breakpoint, so it never invalidates the cached voice prefix.
+ */
+export const MAX_STEER_LENGTH = 200;
+
 export interface GenerationMeta {
   /**
    * The trace id every log line and the JSONL record for this run carry, and
@@ -152,6 +178,16 @@ export interface GenerationMeta {
    */
   cacheReadTokens: number;
   latencyMs: number;
+  /**
+   * Set only on a regeneration: the `generationId` of the run this one
+   * replaces. It is what turns "the creator pressed regenerate" into a
+   * countable dissatisfaction signal — a chain of records joined by parent id
+   * says how many attempts a single idea took, which accept/edit/discard alone
+   * cannot say.
+   */
+  parentGenerationId?: string;
+  /** Set only on a regeneration: which half was re-run. */
+  regeneratedTarget?: RegenerationTarget;
 }
 
 export interface GenerationResult {
