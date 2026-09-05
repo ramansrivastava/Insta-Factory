@@ -8,6 +8,7 @@ import {
   LlmTruncatedError,
   LlmUpstreamError,
 } from "../llm/errors.ts";
+import { VoiceDistillError } from "../voice/distill.ts";
 import { VoiceProfileError } from "../voice/store.ts";
 import type { GenerateErrorBody, GenerateErrorCode } from "../../types/api.ts";
 
@@ -84,6 +85,17 @@ export function toApiError(thrown: unknown): ApiErrorResponse {
       422,
       "invalid_output",
       "The model answered twice without producing a usable hooks-and-script structure. Rephrasing the idea, or asking for fewer hooks, usually clears it.",
+    );
+  }
+
+  // Distillation ran but produced traits the profile schema rejects. Same class
+  // of failure as `LlmSchemaError` from the caller's side — the model answered,
+  // the answer was not usable — so it gets the same code and a re-ask hint.
+  if (thrown instanceof VoiceDistillError) {
+    return error(
+      422,
+      "invalid_output",
+      `The model could not distil a usable voice profile from those samples: ${thrown.message}`,
     );
   }
 
