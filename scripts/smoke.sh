@@ -92,5 +92,43 @@ node -e '
   if (typeof body.model !== "string" || !body.model) throw new Error("health payload missing model");
 ' "$BODY"
 
+# The health endpoint proves the process is up; it does not prove the product
+# works. The real entry point is a raw idea going in and hooks plus a script
+# coming out, so the smoke test exercises that path too — otherwise a
+# generation loop that is broken end to end still smokes green.
+GENERATE_URL="http://127.0.0.1:${PORT}/api/generate"
+IDEA="Two sessions a week beats a five-day split you abandon by week three, and here is how I actually run mine."
+
+echo "[smoke] POST $GENERATE_URL"
+GEN_BODY="$(curl --silent --fail --max-time 120 \
+  --header 'content-type: application/json' \
+  --data "$(node -e 'process.stdout.write(JSON.stringify({ idea: process.argv[1], hookCount: 4 }))' "$IDEA")" \
+  "$GENERATE_URL")"
+
+node -e '
+  const body = JSON.parse(process.argv[1]);
+  if (body.ok !== true) throw new Error(`generate returned ok !== true: ${process.argv[1]}`);
+  if (!Array.isArray(body.hooks) || body.hooks.length !== 4) {
+    throw new Error(`expected 4 hooks, got ${body.hooks && body.hooks.length}`);
+  }
+  const angles = new Set(body.hooks.map((hook) => hook.angle));
+  if (angles.size !== body.hooks.length) throw new Error("hooks repeat an angle");
+  const kinds = (body.script?.sections ?? []).map((section) => section.kind);
+  for (const required of ["hook", "body", "cta"]) {
+    if (!kinds.includes(required)) throw new Error(`script is missing its ${required} section`);
+  }
+' "$GEN_BODY"
+echo "[smoke] generated ${IDEA:0:40}... -> 4 hooks + a complete script"
+
+# A malformed request must be answered, not crash the server. This is the
+# cheapest possible guard against the route throwing past its error mapping.
+echo "[smoke] POST $GENERATE_URL with an empty idea (expecting 400)"
+BAD_STATUS="$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 10 \
+  --header 'content-type: application/json' --data '{"idea":""}' "$GENERATE_URL")"
+if [[ "$BAD_STATUS" != "400" ]]; then
+  echo "[smoke] expected HTTP 400 for an empty idea, got $BAD_STATUS" >&2
+  exit 1
+fi
+
 echo "[smoke] PASS"
 exit 0

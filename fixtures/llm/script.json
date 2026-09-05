@@ -1,0 +1,37 @@
+{
+  "sections": [
+    {
+      "kind": "hook",
+      "text": "You don't need five days a week. You need two you'll actually keep.",
+      "on_screen_text": "two sessions you keep"
+    },
+    {
+      "kind": "setup",
+      "text": "Every quit story I hear starts the same way. You build the program for the version of yourself with six free hours a week. That person doesn't show up."
+    },
+    {
+      "kind": "body",
+      "text": "Here's the boring part. Two sessions a week, full body, is the version you keep past week three. The five-day split isn't better than that, it's just better on paper. You don't fail it because you're lazy. You fail it because it was written for someone with six free hours and you have two. So write the program for the person you actually are.",
+      "on_screen_text": "written for who you actually are"
+    },
+    {
+      "kind": "payoff",
+      "text": "Nothing changes about your training when you switch programs. It changes when the program stops getting abandoned by week three."
+    },
+    {
+      "kind": "cta",
+      "text": "Open your calendar tonight and put two sessions in it. Two, not five.",
+      "on_screen_text": "pick your two days"
+    }
+  ],
+  "claims": [
+    {
+      "text": "Two sessions a week beats a five-day split you abandon.",
+      "grounded_in": "why two sessions a week beats a five-day split you abandon by week three"
+    },
+    {
+      "text": "People quit because they build the program for a version of themselves with six free hours a week.",
+      "grounded_in": "they build a program for the version of themselves with six free hours a week"
+    }
+  ]
+}
