@@ -1,0 +1,90 @@
+{
+  "id": "product-app-launch",
+  "format": "product",
+  "split": "tuning",
+  "covers": "A launch announcement with a stated omission — the case most likely to pull in invented features, prices or user counts.",
+  "idea": "Announce the training app I have been building for a year: it logs the two-day week, tells you when to add weight based on your last set, and does not have a social feed. It is a paid app and there is no free tier, because I do not want to sell your data.",
+  "hook_count": 5,
+  "offline": {
+    "hooks": [
+      {
+        "text": "I built the app I could not find. It's out today.",
+        "angle": "bold_claim",
+        "rationale": "The flattest possible statement of the thing itself."
+      },
+      {
+        "text": "There's no free tier. That's on purpose.",
+        "angle": "contrarian",
+        "rationale": "Contradicts what the viewer expects from an app launch."
+      },
+      {
+        "text": "There's one feature I left out on purpose, and it's the one every other app leads with.",
+        "angle": "curiosity_gap",
+        "rationale": "Opens the gap on the omission without naming it."
+      },
+      {
+        "text": "You're logging sets in a notes app and guessing when to go heavier.",
+        "angle": "pain_point",
+        "rationale": "Names the frustration the product exists for."
+      },
+      {
+        "text": "A year ago I was writing sets on the back of a receipt.",
+        "angle": "story_cold_open",
+        "rationale": "Drops into the moment the work started."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "I built the app I could not find. It's out today.",
+          "on_screen_text": "out today"
+        },
+        {
+          "kind": "setup",
+          "text": "A year of this, mostly in the evenings, because the thing I wanted did not exist."
+        },
+        {
+          "kind": "body",
+          "text": "It logs the two-day week. It looks at your last set and tells you when to add weight, which is the decision most people get wrong. And it has no social feed. Nothing to scroll, nobody to compare yourself to. It is paid, with no free tier, because the free version of a product like this gets paid for with your data and I did not want to build that."
+        },
+        {
+          "kind": "payoff",
+          "text": "It does the two things you actually need and then it gets out of your way."
+        },
+        {
+          "kind": "cta",
+          "text": "It's live now. If you've been logging in a notes app, try it this week."
+        }
+      ],
+      "claims": [
+        {
+          "text": "The app logs the two-day week and tells you when to add weight.",
+          "grounded_in": "it logs the two-day week, tells you when to add weight based on your last set"
+        },
+        {
+          "text": "It is paid with no free tier so that data is not sold.",
+          "grounded_in": "there is no free tier, because I do not want to sell your data"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 4,
+        "evidence": "Announces something without hyping it, which is the hard part here; the body runs slightly longer than the profile's rhythm."
+      },
+      "hook_distinctiveness": {
+        "score": 5,
+        "evidence": "Five different promises, from the flat announcement to the withheld omission to the cold open."
+      },
+      "script_completeness": {
+        "score": 5,
+        "evidence": "Every claim in the body is a real feature and the close asks for one action this week."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "No price, no download count, no launch date beyond \"today\" — nothing the idea did not supply."
+      }
+    }
+  }
+}

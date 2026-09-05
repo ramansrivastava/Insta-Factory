@@ -1,0 +1,84 @@
+{
+  "id": "storytime-coach-quit",
+  "format": "storytime",
+  "split": "held_out",
+  "covers": "Held-out story where the point is about someone else's advice being wrong — an easy place for a model to editorialise beyond the idea.",
+  "idea": "Story about the coach I quit after six weeks because every session ended with him telling me I needed to want it more, and how the next coach just changed my rest times and my sleep and the problem went away.",
+  "hook_count": 4,
+  "offline": {
+    "hooks": [
+      {
+        "text": "I did not need to want it more. I needed to sleep.",
+        "angle": "contrarian",
+        "rationale": "Contradicts the diagnosis the story is a rebuttal of."
+      },
+      {
+        "text": "He's standing over me between sets, telling me it's a mindset thing.",
+        "angle": "story_cold_open",
+        "rationale": "Drops into the middle of the scene, present tense."
+      },
+      {
+        "text": "The next coach changed two things, and neither of them was my attitude.",
+        "angle": "curiosity_gap",
+        "rationale": "Opens the gap on what actually changed."
+      },
+      {
+        "text": "You've been told you're not trying hard enough by someone who wasn't paying attention.",
+        "angle": "pain_point",
+        "rationale": "Names the frustration in the viewer's own words."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "I did not need to want it more. I needed to sleep."
+        },
+        {
+          "kind": "setup",
+          "text": "Six weeks with a coach whose answer to every bad session was that I wanted it less than the people getting results."
+        },
+        {
+          "kind": "body",
+          "text": "So I quit, which took me longer than it should have. The next coach asked what my rest times were and what time I was getting to bed. He made the rest longer, moved the sessions earlier, and they stopped falling apart halfway through. Same body, same effort, different inputs."
+        },
+        {
+          "kind": "payoff",
+          "text": "If effort had been the problem, more effort would have fixed it. It never did."
+        },
+        {
+          "kind": "cta",
+          "text": "If every session ends with you being told to try harder, ask what else changed. If the answer is nothing, leave."
+        }
+      ],
+      "claims": [
+        {
+          "text": "I left that coach after six weeks.",
+          "grounded_in": "the coach I quit after six weeks"
+        },
+        {
+          "text": "The fix was rest times and sleep.",
+          "grounded_in": "changed my rest times and my sleep and the problem went away"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 5,
+        "evidence": "Blunt about someone else without hyping the outcome, and the close is one line in the profile's register."
+      },
+      "hook_distinctiveness": {
+        "score": 4,
+        "evidence": "Four distinct promises, though the contrarian hook and the payoff make the same move twice."
+      },
+      "script_completeness": {
+        "score": 5,
+        "evidence": "The body names both changes and the close gives the viewer a decision rule to act on."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "Only rest times and sleep are named as the fix — no coaching credential, method or research is introduced."
+      }
+    }
+  }
+}

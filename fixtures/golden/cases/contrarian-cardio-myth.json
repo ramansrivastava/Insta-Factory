@@ -1,0 +1,89 @@
+{
+  "id": "contrarian-cardio-myth",
+  "format": "contrarian_take",
+  "split": "tuning",
+  "covers": "A take that concedes half the received wisdom — the format most likely to pull in a fabricated study for support.",
+  "idea": "Argue that cardio does not kill your gains, but the way most lifters do cardio does: an hour of hard intervals the morning of a leg day is not the same thing as a walk. The problem is placement and intensity, not cardio itself.",
+  "hook_count": 5,
+  "offline": {
+    "hooks": [
+      {
+        "text": "Cardio is not killing your gains. Your timing is.",
+        "angle": "contrarian",
+        "rationale": "Contradicts the belief plainly while keeping the half that is true."
+      },
+      {
+        "text": "You can run and get stronger. Most people just do both badly.",
+        "angle": "bold_claim",
+        "rationale": "The strongest true version of the idea, stated flat."
+      },
+      {
+        "text": "There's one thing that decides whether cardio costs you anything, and it isn't how much you do.",
+        "angle": "curiosity_gap",
+        "rationale": "Opens the gap on placement without naming it."
+      },
+      {
+        "text": "You dropped cardio to protect your gains and now the stairs are a problem.",
+        "angle": "pain_point",
+        "rationale": "Names the frustration the viewer is actually living in."
+      },
+      {
+        "text": "An hour of hard intervals the morning of a leg day is not the same thing as a walk.",
+        "angle": "stat_or_fact",
+        "rationale": "Leads with a concrete comparison the idea already contains."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "Cardio is not killing your gains. Your timing is."
+        },
+        {
+          "kind": "setup",
+          "text": "The advice got flattened into avoid cardio, and a lot of people took it seriously."
+        },
+        {
+          "kind": "body",
+          "text": "An hour of hard intervals on the morning of a leg day will take something out of that leg day. A walk will not. Same word, two completely different demands. Put the hard stuff on a day you are not squatting, or after the lifting instead of before it, and most of the conflict disappears. The problem is placement and intensity, not cardio."
+        },
+        {
+          "kind": "payoff",
+          "text": "You get to keep your heart and your squat. It was never actually a choice."
+        },
+        {
+          "kind": "cta",
+          "text": "Find your hardest cardio session this week and move it one day."
+        }
+      ],
+      "claims": [
+        {
+          "text": "The conflict comes from placement and intensity, not cardio.",
+          "grounded_in": "The problem is placement and intensity, not cardio itself"
+        },
+        {
+          "text": "Hard intervals before a leg day are not equivalent to a walk.",
+          "grounded_in": "an hour of hard intervals the morning of a leg day is not the same thing as a walk"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 4,
+        "evidence": "Blunt and unhyped in the profile's register, though the setup line is more explanatory than the profile's usual opener."
+      },
+      "hook_distinctiveness": {
+        "score": 5,
+        "evidence": "Five distinct promises, and the stat hook uses the comparison from the idea rather than inventing a figure."
+      },
+      "script_completeness": {
+        "score": 5,
+        "evidence": "The body gives the actual rule and the close asks for one specific change."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "No percentage, study or research group appears — the only concrete comparison is the one the idea supplies."
+      }
+    }
+  }
+}

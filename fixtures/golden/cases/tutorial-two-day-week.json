@@ -1,0 +1,90 @@
+{
+  "id": "tutorial-two-day-week",
+  "format": "tutorial",
+  "split": "tuning",
+  "covers": "A how-to with an ordered procedure — the format most likely to come back as a numbered list in someone else's voice.",
+  "idea": "How to build a two-day full body week when you have almost no time. Same five movements both days: a push, a pull, a hinge, a squat and a carry. Change the order on the second day, and add a little weight only when the last set still looks clean.",
+  "hook_count": 5,
+  "offline": {
+    "hooks": [
+      {
+        "text": "You don't need a program. You need the same five movements twice.",
+        "angle": "contrarian",
+        "rationale": "Contradicts the belief that a plan has to be complicated before it counts."
+      },
+      {
+        "text": "There's a reason your second session should not look like your first.",
+        "angle": "curiosity_gap",
+        "rationale": "Names the order change without explaining it, so the viewer stays for the why."
+      },
+      {
+        "text": "You keep saving splits you never open.",
+        "angle": "pain_point",
+        "rationale": "Speaks to the exact frustration of a person with no time to give."
+      },
+      {
+        "text": "Two days a week, done properly, will carry you for a year.",
+        "angle": "bold_claim",
+        "rationale": "States the strongest true version of the idea as a flat assertion."
+      },
+      {
+        "text": "It's a quarter past six and you have forty minutes.",
+        "angle": "story_cold_open",
+        "rationale": "Drops into the middle of the moment the plan has to survive."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "You don't need a program. You need the same five movements twice.",
+          "on_screen_text": "same five, twice"
+        },
+        {
+          "kind": "setup",
+          "text": "A push, a pull, a hinge, a squat and a carry. That's the whole week."
+        },
+        {
+          "kind": "body",
+          "text": "Day one you run them in that order. Day two you flip it, so the thing that was last while you were tired now gets you at your freshest. Nothing else changes. You add a little weight only when the last set still looks clean, not when you feel like you have earned it. Here's the boring part: for the first stretch this will feel like barely training."
+        },
+        {
+          "kind": "payoff",
+          "text": "Two sessions you actually keep beats five you abandon in week three."
+        },
+        {
+          "kind": "cta",
+          "text": "Write the five movements in your phone tonight and pick your two days."
+        }
+      ],
+      "claims": [
+        {
+          "text": "The week is five movements repeated twice.",
+          "grounded_in": "Same five movements both days"
+        },
+        {
+          "text": "Load goes up only when the last set is still clean.",
+          "grounded_in": "add a little weight only when the last set still looks clean"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 5,
+        "evidence": "\"Here's the boring part\" and the bare declarative opener are the profile's own patterns, and the register stays casual throughout."
+      },
+      "hook_distinctiveness": {
+        "score": 5,
+        "evidence": "A contradiction, an opened gap, a named frustration, a flat claim and a cold open — five different promises, none interchangeable."
+      },
+      "script_completeness": {
+        "score": 5,
+        "evidence": "The body delivers the actual procedure the hook promised, and the close asks for two specific days rather than a follow."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "Every movement, the order flip and the progression rule come from the idea; no number, name or study is added."
+      }
+    }
+  }
+}

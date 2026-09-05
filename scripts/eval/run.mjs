@@ -24,10 +24,23 @@
  * or 0. Judging whether the writing is any *good* is Layer 2's job (Phase 7),
  * and the only ground truth for that is Layer 3's accept/edit/discard data.
  *
+ * `--with-judge` adds Layer 2 on top: the twelve-case golden set from
+ * `fixtures/golden/`, each generation graded by `scripts/eval/judge.mjs`'s
+ * rubric judge. It is off by default because it is the slow, and with an API
+ * key the expensive, half — the default run stays a fast local gate. When it
+ * is on, the Layer-1 dimensions keep half the total weight and the golden-set
+ * dimensions take the other half.
+ *
  * Usage:
  *   node scripts/eval/run.mjs
+ *   node scripts/eval/run.mjs --with-judge         # + the golden set and the judge
  *   EVAL_SKIP_SMOKE=1 node scripts/eval/run.mjs   # Layer-1 checks only, no build
  */
+
+// Set before anything imports `lib/log.ts`: the pipeline emits a JSON log line
+// per phase on stdout, and stdout here must parse as a single object. An
+// operator who asked for logs explicitly still gets them.
+if (!process.env.LOG_LEVEL) process.env.LOG_LEVEL = "silent";
 
 import { spawnSync } from "node:child_process";
 import path from "node:path";
@@ -164,7 +177,103 @@ function fromCoreLoop(loop, name) {
   return { passed: check.passed, score: check.score, details: check.details };
 }
 
+/**
+ * Layer 2: the golden set, and the judge over it.
+ *
+ * Returns the four project dimensions `factory.md` binds, plus the judge's own
+ * four. Everything here is a floor pass rate — see `lib/eval/judge.ts` for why
+ * a judge mean is never what gets scored.
+ * @param {number} projectWeight total weight to split across the project dimensions
+ * @param {number} judgeWeight   total weight to split across the judge dimensions
+ */
+async function goldenDimensions(projectWeight, judgeWeight) {
+  const { runGoldenSet } = await import(path.join(ROOT, "lib/eval/golden-run.ts"));
+  const { PROJECT_DIMENSIONS, scoreProjectDimension } = await import(
+    path.join(ROOT, "lib/eval/project-dimensions.ts"),
+  );
+  const { summariseJudgement, toEvalResult, judgeSharesGeneratorModel } = await import(
+    path.join(ROOT, "lib/eval/judge.ts")
+  );
+  const { JUDGE_DIMENSIONS } = await import(path.join(ROOT, "types/judge.ts"));
+
+  if (judgeSharesGeneratorModel()) {
+    process.stderr.write(
+      "[eval] WARNING: JUDGE_MODEL matches LLM_MODEL — the model is grading its own output. Self-preference bias does not show up in the score.\n",
+    );
+  }
+
+  const report = await runGoldenSet({
+    withJudge: true,
+    onProgress: (line) => process.stderr.write(`[eval] ${line}\n`),
+  });
+
+  /** @type {Result[]} */
+  const results = PROJECT_DIMENSIONS.map((name) => {
+    const scored = scoreProjectDimension(name, report);
+    const passed = scored.score === 1;
+    process.stderr.write(
+      `[eval] golden_${name}: ${passed ? "PASS" : "FAIL"} (${scored.score.toFixed(2)}) — ${scored.details}\n`,
+    );
+    // Prefixed: `hook_distinctiveness` already exists above as a single
+    // generation's Layer-1 gate, and two rows with one name in the same results
+    // array is a report nobody can read.
+    return {
+      name: `golden_${name}`,
+      score: scored.score,
+      weight: projectWeight / PROJECT_DIMENSIONS.length,
+      passed,
+      details: scored.details,
+    };
+  });
+
+  const judged = report.outcomes
+    .filter((outcome) => outcome.verdict)
+    .map((outcome) => ({ id: outcome.id, verdict: outcome.verdict }));
+
+  for (const summary of summariseJudgement(judged)) {
+    const result = toEvalResult(summary, judgeWeight / JUDGE_DIMENSIONS.length, judged.length);
+    process.stderr.write(
+      `[eval] ${result.name}: ${result.passed ? "PASS" : "FAIL"} (${result.score.toFixed(2)}) — ${result.details}\n`,
+    );
+    results.push(result);
+  }
+
+  return results;
+}
+
+/** @param {string[]} argv */
+function parseArgs(argv) {
+  const args = { withJudge: false };
+  for (const arg of argv) {
+    if (arg === "--with-judge") {
+      args.withJudge = true;
+    } else if (arg === "--help" || arg === "-h") {
+      args.help = true;
+    } else {
+      throw new Error(`Unknown argument ${arg}. Try --help.`);
+    }
+  }
+  return args;
+}
+
+const USAGE = `node scripts/eval/run.mjs [--with-judge]
+
+  --with-judge   Also run the twelve-case golden set and the rubric judge
+                 (Layer 2). Slower, and not free with an API key. Layer 1
+                 keeps half the weight; the golden set takes the other half.
+  EVAL_SKIP_SMOKE=1 in the environment skips the build/start smoke dimension.`;
+
 async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
+    process.stdout.write(`${USAGE}\n`);
+    return;
+  }
+
+  // With the judge on, Layer 1 is halved so the golden set carries real weight
+  // rather than being a rounding error on top of seven existing dimensions.
+  const layer1 = args.withJudge ? 0.5 : 1;
+
   process.stderr.write("[eval] running the core loop once for the product dimensions ...\n");
   /** @type {Map<string, {passed: boolean, score: number, details: string}> | Error} */
   let loop;
@@ -176,20 +285,41 @@ async function main() {
   }
 
   const results = [
-    await runDimension("schema_validity", 0.15, schemaValidity),
-    await runDimension("smoke_passes", 0.15, async () => smokePasses()),
-    await runDimension("hook_count", 0.1, async () => fromCoreLoop(loop, "hook_count")),
-    await runDimension("hook_distinctiveness", 0.15, async () =>
+    await runDimension("schema_validity", 0.15 * layer1, schemaValidity),
+    await runDimension("smoke_passes", 0.15 * layer1, async () => smokePasses()),
+    await runDimension("hook_count", 0.1 * layer1, async () => fromCoreLoop(loop, "hook_count")),
+    await runDimension("hook_distinctiveness", 0.15 * layer1, async () =>
       fromCoreLoop(loop, "hook_distinctiveness"),
     ),
-    await runDimension("banned_phrases", 0.15, async () =>
+    await runDimension("banned_phrases", 0.15 * layer1, async () =>
       fromCoreLoop(loop, "banned_phrases"),
     ),
-    await runDimension("section_completeness", 0.15, async () =>
+    await runDimension("section_completeness", 0.15 * layer1, async () =>
       fromCoreLoop(loop, "section_completeness"),
     ),
-    await runDimension("groundedness", 0.15, async () => fromCoreLoop(loop, "groundedness")),
+    await runDimension("groundedness", 0.15 * layer1, async () =>
+      fromCoreLoop(loop, "groundedness"),
+    ),
   ];
+
+  if (args.withJudge) {
+    process.stderr.write("[eval] layer 2: the golden set, graded ...\n");
+    try {
+      // 0.3 to the four project dimensions, 0.2 to the judge's own four: the
+      // dimensions the factory scores on outweigh the triage signal behind them.
+      results.push(...(await goldenDimensions(0.3, 0.2)));
+    } catch (error) {
+      const details = error instanceof Error ? error.message : String(error);
+      process.stderr.write(`[eval] golden set errored: ${details}\n`);
+      results.push({
+        name: "golden_set",
+        score: 0,
+        weight: 0.5,
+        passed: false,
+        details: `the golden set could not be run: ${details}`,
+      });
+    }
+  }
 
   process.stdout.write(`${JSON.stringify({ results }, null, 2)}\n`);
 
