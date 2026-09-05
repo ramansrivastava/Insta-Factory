@@ -187,7 +187,6 @@ describe("buildScriptRequest", () => {
   });
 });
 
-
 /**
  * Regeneration prompts.
  *
