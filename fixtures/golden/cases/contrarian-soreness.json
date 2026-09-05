@@ -1,0 +1,76 @@
+{
+  "id": "contrarian-soreness",
+  "format": "contrarian_take",
+  "split": "tuning",
+  "covers": "A short take with no procedure in it — checks the script can be complete without a list of steps to fall back on.",
+  "idea": "Push back on soreness as a measure of a good session. You get sore from novelty and from lengthened positions, not from productive work, and the sessions that built the most for me were the ones I walked out of feeling like I had not done much.",
+  "hook_count": 3,
+  "offline": {
+    "hooks": [
+      {
+        "text": "Soreness is not a receipt.",
+        "angle": "contrarian",
+        "rationale": "Contradicts the belief in four words, no hedging."
+      },
+      {
+        "text": "You finish a session feeling fine and decide you wasted it.",
+        "angle": "pain_point",
+        "rationale": "Names the frustration exactly as the viewer experiences it."
+      },
+      {
+        "text": "There's a reason the sessions that build the most feel like the least.",
+        "angle": "curiosity_gap",
+        "rationale": "Opens the gap without closing it."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "Soreness is not a receipt.",
+          "on_screen_text": "soreness is not a receipt"
+        },
+        {
+          "kind": "setup",
+          "text": "You walk out feeling fine, decide it did not count, and add sets you did not need."
+        },
+        {
+          "kind": "body",
+          "text": "You get sore from novelty and from lengthened positions. Do something your body has not done in months and you will feel it tomorrow, whether or not it was useful. The sessions that built the most for me were the ones I walked out of feeling like I had not done much. Boring, repeatable, slightly heavier than last week."
+        },
+        {
+          "kind": "payoff",
+          "text": "Chase the number going up, not the ache. Only one of those is evidence."
+        },
+        {
+          "kind": "cta",
+          "text": "Next session, write down the weight and the reps and ignore how you feel tomorrow."
+        }
+      ],
+      "claims": [
+        {
+          "text": "Soreness comes from novelty and lengthened positions.",
+          "grounded_in": "You get sore from novelty and from lengthened positions"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 5,
+        "evidence": "Four-word opener, fragments in the body, and a one-line close — the profile's rhythm almost exactly."
+      },
+      "hook_distinctiveness": {
+        "score": 3,
+        "evidence": "The three hooks are genuinely different moves, but the gap hook is close enough to the pain hook that the creator has two real choices rather than three."
+      },
+      "script_completeness": {
+        "score": 4,
+        "evidence": "Filmable as written; the body is thinner than the other cases because the idea is a single claim."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "No mechanism, study or timeframe is invented beyond what the idea states."
+      }
+    }
+  }
+}

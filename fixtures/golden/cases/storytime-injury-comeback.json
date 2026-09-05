@@ -1,0 +1,84 @@
+{
+  "id": "storytime-injury-comeback",
+  "format": "storytime",
+  "split": "tuning",
+  "covers": "A story with a timeline and a lesson — checks the script keeps the sequence rather than jumping straight to the moral.",
+  "idea": "Story about tweaking my back on a deadlift I had no business pulling, and what the comeback actually looked like: three weeks of walking and empty bar work, then starting again at a weight that felt insulting, and being back past the old number by the autumn.",
+  "hook_count": 4,
+  "offline": {
+    "hooks": [
+      {
+        "text": "The bar is halfway up my shins and I already know it's wrong.",
+        "angle": "story_cold_open",
+        "rationale": "Drops into the moment itself, present tense."
+      },
+      {
+        "text": "The comeback was not brave. It was insultingly light.",
+        "angle": "contrarian",
+        "rationale": "Contradicts what a comeback is assumed to look like."
+      },
+      {
+        "text": "You're scared of the lift that hurt you and nobody tells you what to do about that.",
+        "angle": "pain_point",
+        "rationale": "Names the frustration the viewer is living in."
+      },
+      {
+        "text": "You will get back past your old number. Just not this month.",
+        "angle": "bold_claim",
+        "rationale": "The strongest true version, stated without hedging."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "The bar is halfway up my shins and I already know it's wrong."
+        },
+        {
+          "kind": "setup",
+          "text": "I pulled a weight I had no business pulling, on a day I had decided in advance was going to be a good one."
+        },
+        {
+          "kind": "body",
+          "text": "The comeback was three weeks of walking and empty bar work, which felt like doing nothing at all. Then I started again at a weight that felt insulting, and I stayed there longer than my ego wanted to. Here's the boring part: that stretch is the comeback. The heavy day at the end is just the receipt."
+        },
+        {
+          "kind": "payoff",
+          "text": "By the autumn I was past the old number, and my back has not said anything about it since."
+        },
+        {
+          "kind": "cta",
+          "text": "If you're in the walking and empty bar part, stay there one week longer than you want to."
+        }
+      ],
+      "claims": [
+        {
+          "text": "The comeback began with walking and empty bar work.",
+          "grounded_in": "three weeks of walking and empty bar work"
+        },
+        {
+          "text": "I restarted at a weight that felt insulting.",
+          "grounded_in": "starting again at a weight that felt insulting"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 4,
+        "evidence": "The rhythm and the self-deprecation match, though \"just the receipt\" is a shade more writerly than the profile's plain register."
+      },
+      "hook_distinctiveness": {
+        "score": 4,
+        "evidence": "Four separate promises, but the cold open and the pain hook both trade on the same fear."
+      },
+      "script_completeness": {
+        "score": 5,
+        "evidence": "Sequence is intact, the body pays off the hook, and the ask is one specific week."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "The timeline is the creator's own and no rehab protocol, clinician or study is invented around it."
+      }
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "id": "storytime-first-gym-day",
+  "format": "storytime",
+  "split": "tuning",
+  "covers": "First-person narrative with an admission in it — the format most at risk of being sanded into generic motivational copy.",
+  "idea": "Tell the story of my first day in a gym: I walked in, did twenty minutes on a bike facing the wall, and left without touching a weight because I did not know where anything was and was sure everyone was watching. Took me a month to go back.",
+  "hook_count": 5,
+  "offline": {
+    "hooks": [
+      {
+        "text": "I'm on a bike facing a wall, and I've been there twenty minutes.",
+        "angle": "story_cold_open",
+        "rationale": "Drops into the middle of the moment, present tense, no setup."
+      },
+      {
+        "text": "You've done the lap. Walked in, looked around, walked out.",
+        "angle": "pain_point",
+        "rationale": "Names the exact thing the viewer did last week."
+      },
+      {
+        "text": "Nobody was watching me. That was the part I got wrong.",
+        "angle": "contrarian",
+        "rationale": "Contradicts the belief the whole story is built on."
+      },
+      {
+        "text": "It took me a month to work out what actually stopped me that day.",
+        "angle": "curiosity_gap",
+        "rationale": "Opens the gap on the reason without closing it."
+      },
+      {
+        "text": "The first day is the only genuinely hard one.",
+        "angle": "bold_claim",
+        "rationale": "The strongest true version of the idea, stated flat."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "I'm on a bike facing a wall, and I've been there twenty minutes.",
+          "on_screen_text": "first day, still on the bike"
+        },
+        {
+          "kind": "setup",
+          "text": "First day in a gym. I did not know where anything was, and I was certain everyone could tell."
+        },
+        {
+          "kind": "body",
+          "text": "So I left without touching a weight. Not because I could not lift anything. Because I could not work out where the thing I wanted was, and asking felt worse than leaving. Then it took me a month to go back, and the month was the expensive part, not the session I skipped."
+        },
+        {
+          "kind": "payoff",
+          "text": "Nobody is watching you. They are counting their own reps and thinking about their own hands."
+        },
+        {
+          "kind": "cta",
+          "text": "If you did the lap and left, go back this week. Same door, same time."
+        }
+      ],
+      "claims": [
+        {
+          "text": "I left the first session without lifting anything.",
+          "grounded_in": "left without touching a weight"
+        },
+        {
+          "text": "It was a month before I went back.",
+          "grounded_in": "Took me a month to go back"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 5,
+        "evidence": "Present-tense confession opener and \"nobody is watching you\" used where it lands, with the profile's short declaratives throughout."
+      },
+      "hook_distinctiveness": {
+        "score": 5,
+        "evidence": "A cold open, a named frustration, a reframe, an opened gap and a flat claim — five different entry points into the same story."
+      },
+      "script_completeness": {
+        "score": 4,
+        "evidence": "Filmable end to end, though the payoff carries the whole lesson and the body stays close to plot."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "Every beat is in the idea, including the month, and no gym, city or person is named that the creator did not name."
+      }
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "id": "product-lifting-belt",
+  "format": "product",
+  "split": "tuning",
+  "covers": "A product post that tells most of the audience not to buy — checks the script does not drift into promotional register.",
+  "idea": "Talk about the lifting belt I actually use and who should not buy one yet. It helps on heavy squats and pulls once you can already brace without it, and it does nothing for the person who bought it in their first month hoping it would protect their back.",
+  "hook_count": 4,
+  "offline": {
+    "hooks": [
+      {
+        "text": "Most people buying a belt do not need one yet.",
+        "angle": "contrarian",
+        "rationale": "Contradicts the purchase the viewer is about to make."
+      },
+      {
+        "text": "You bought the belt to protect your back and your back still hurts.",
+        "angle": "pain_point",
+        "rationale": "Names the frustration the viewer already paid for."
+      },
+      {
+        "text": "A belt is a tool for a brace you already have.",
+        "angle": "bold_claim",
+        "rationale": "The strongest true version of the idea, stated flat."
+      },
+      {
+        "text": "There's one thing that has to be true before a belt does anything for you.",
+        "angle": "curiosity_gap",
+        "rationale": "Opens the gap on the precondition without naming it."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "Most people buying a belt do not need one yet."
+        },
+        {
+          "kind": "setup",
+          "text": "It's the first thing that gets bought and the last thing that gets used properly."
+        },
+        {
+          "kind": "body",
+          "text": "A belt gives you something to brace against on heavy squats and pulls. Which means it helps once you can already brace without it. If you bought one in your first month hoping it would protect your back, it is doing nothing, and it is quietly hiding the thing you actually needed to learn. Learn the brace first. Buy the belt when it starts limiting you."
+        },
+        {
+          "kind": "payoff",
+          "text": "Then it becomes what it was always meant to be. A bit more of what you can already do."
+        },
+        {
+          "kind": "cta",
+          "text": "Before you buy one, do a heavy set without it and tell me what your ribs do."
+        }
+      ],
+      "claims": [
+        {
+          "text": "A belt helps once you can brace without it.",
+          "grounded_in": "once you can already brace without it"
+        },
+        {
+          "text": "It does nothing for a first-month lifter hoping for back protection.",
+          "grounded_in": "it does nothing for the person who bought it in their first month hoping it would protect their back"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 5,
+        "evidence": "Talks one person out of a purchase in the profile's flat register, with no selling anywhere in it."
+      },
+      "hook_distinctiveness": {
+        "score": 4,
+        "evidence": "Four different promises; the bold claim and the gap hook are near neighbours but not interchangeable."
+      },
+      "script_completeness": {
+        "score": 5,
+        "evidence": "The body gives the rule and the exception, and the close asks for one specific test."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "No brand, price or model is named — the idea did not supply one and the script does not invent one."
+      }
+    }
+  }
+}

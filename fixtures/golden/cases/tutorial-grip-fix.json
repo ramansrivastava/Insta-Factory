@@ -1,0 +1,85 @@
+{
+  "id": "tutorial-grip-fix",
+  "format": "tutorial",
+  "split": "tuning",
+  "covers": "A single-fix tutorial with a diagnosis attached — tests whether the script keeps the diagnosis and the fix distinct instead of merging them into advice.",
+  "idea": "Teach the fix for a grip that gives out before the back does on rows and pulls. Hook the thumb around the bar instead of tucking it, drop the weight a notch, and hold the last rep at the top for a slow count. Most people are not weak, they are just letting go early.",
+  "hook_count": 4,
+  "offline": {
+    "hooks": [
+      {
+        "text": "Your hands quit before your back does. Every time.",
+        "angle": "pain_point",
+        "rationale": "Names the frustration in the words the viewer would use themselves."
+      },
+      {
+        "text": "You're not weak. You're letting go early.",
+        "angle": "contrarian",
+        "rationale": "Contradicts the self-diagnosis the viewer arrived with."
+      },
+      {
+        "text": "There's one thing you do with your thumb that costs you the whole set.",
+        "angle": "curiosity_gap",
+        "rationale": "Opens the gap on the fix without giving it away."
+      },
+      {
+        "text": "Fix your grip and your rows get better without adding a kilo.",
+        "angle": "bold_claim",
+        "rationale": "The strongest true version of the idea, stated flat."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "Your hands quit before your back does."
+        },
+        {
+          "kind": "setup",
+          "text": "Every row, every pull, same story. You put the bar down and your back still has plenty left in it."
+        },
+        {
+          "kind": "body",
+          "text": "Hook the thumb around the bar instead of tucking it behind your fingers. Then drop the weight a notch, because you are not chasing the number today. On the last rep, hold at the top for a slow count and let your hands find out that this is survivable. Nobody is watching you shake."
+        },
+        {
+          "kind": "payoff",
+          "text": "Give it a few weeks and your grip stops being the thing that ends the set. Then you find out what your back can actually do.",
+          "on_screen_text": "grip stops ending the set"
+        },
+        {
+          "kind": "cta",
+          "text": "Next back day, thumb around the bar. Tell me whether the last set feels different."
+        }
+      ],
+      "claims": [
+        {
+          "text": "The thumb goes around the bar rather than tucked.",
+          "grounded_in": "Hook the thumb around the bar instead of tucking it"
+        },
+        {
+          "text": "Grip failure is usually letting go early, not weakness.",
+          "grounded_in": "Most people are not weak, they are just letting go early"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 4,
+        "evidence": "\"Nobody is watching you shake\" lands a signature phrase naturally, though the payoff runs longer than the profile's one-line close."
+      },
+      "hook_distinctiveness": {
+        "score": 5,
+        "evidence": "The frustration, the reframe, the withheld fix and the flat claim each start a different video."
+      },
+      "script_completeness": {
+        "score": 5,
+        "evidence": "Diagnosis, fix and one concrete ask; nothing is left for the creator to write."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "The thumb, the weight drop and the slow count all come from the idea, and no equipment or study is invented."
+      }
+    }
+  }
+}

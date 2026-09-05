@@ -1,0 +1,84 @@
+{
+  "id": "contrarian-morning-workouts",
+  "format": "contrarian_take",
+  "split": "held_out",
+  "covers": "Held-out take that argues against a habit many viewers are proud of — the case most likely to get softened into a both-sides script.",
+  "idea": "Take the position that morning workouts are not morally superior, they are just the only slot some people can defend. If your evenings are actually free and you sleep badly, training in the morning is costing you more than it gives you.",
+  "hook_count": 4,
+  "offline": {
+    "hooks": [
+      {
+        "text": "Morning training is not discipline. It's scheduling.",
+        "angle": "contrarian",
+        "rationale": "Contradicts the identity the viewer has built around it."
+      },
+      {
+        "text": "The best time to train is the hour nobody else can take from you.",
+        "angle": "bold_claim",
+        "rationale": "The strongest true version of the idea as a flat assertion."
+      },
+      {
+        "text": "You set the alarm, hated every second, and decided you were the problem.",
+        "angle": "pain_point",
+        "rationale": "Names the frustration in the viewer's own words."
+      },
+      {
+        "text": "There's one question that tells you whether your morning session is worth the sleep it costs.",
+        "angle": "curiosity_gap",
+        "rationale": "Opens the gap on the trade without resolving it."
+      }
+    ],
+    "script": {
+      "sections": [
+        {
+          "kind": "hook",
+          "text": "Morning training is not discipline. It's scheduling."
+        },
+        {
+          "kind": "setup",
+          "text": "Somewhere along the way the early session stopped being a slot on a calendar and became a personality."
+        },
+        {
+          "kind": "body",
+          "text": "It works for one honest reason. At that hour nothing else can claim the time. That is a real advantage and it is the whole advantage. If your evenings are genuinely free and you sleep badly, you are trading sleep you need for a slot you did not have to take, and the session gets worse along with everything after it."
+        },
+        {
+          "kind": "payoff",
+          "text": "Pick the hour you can defend. If that's the morning, good. If it isn't, stop apologising for it."
+        },
+        {
+          "kind": "cta",
+          "text": "Look at your week and name the hour nobody else wants. Train then."
+        }
+      ],
+      "claims": [
+        {
+          "text": "The morning slot's advantage is that it can be defended.",
+          "grounded_in": "they are just the only slot some people can defend"
+        },
+        {
+          "text": "Morning training costs more than it gives when evenings are free and sleep is poor.",
+          "grounded_in": "If your evenings are actually free and you sleep badly, training in the morning is costing you more than it gives you"
+        }
+      ]
+    },
+    "judge": {
+      "voice_fidelity": {
+        "score": 4,
+        "evidence": "Blunt and warm in the right proportion, though the payoff's three-part structure is tidier than the profile's usual close."
+      },
+      "hook_distinctiveness": {
+        "score": 5,
+        "evidence": "A reframe, a flat claim, a named frustration and a withheld question — four different videos."
+      },
+      "script_completeness": {
+        "score": 5,
+        "evidence": "The body states the mechanism and the trade, and the close asks for one concrete act of scheduling."
+      },
+      "instruction_adherence": {
+        "score": 5,
+        "evidence": "No sleep study, hormone claim or timing research is introduced; the argument stays inside the idea."
+      }
+    }
+  }
+}
