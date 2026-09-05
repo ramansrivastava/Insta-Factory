@@ -1,3 +1,4 @@
+import { FeedbackWriteError } from "./feedback-service.ts";
 import { HookRequestError } from "../prompts/hooks.ts";
 import { GenerationInputError } from "../generate/idea.ts";
 import {
@@ -142,6 +143,17 @@ export function toApiError(thrown: unknown): ApiErrorResponse {
       500,
       "server_error",
       `The generator is misconfigured: ${thrown.message}`,
+    );
+  }
+
+  // The generation succeeded and only the accept/edit/discard line failed to
+  // land. Still a 500 — silently dropping the one piece of ground truth this
+  // product will ever have would be worse than telling the caller.
+  if (thrown instanceof FeedbackWriteError) {
+    return error(
+      500,
+      "server_error",
+      `Could not record that feedback: ${thrown.message} Check that data/generations/ is writable.`,
     );
   }
 

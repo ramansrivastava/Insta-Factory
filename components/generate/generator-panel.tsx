@@ -226,12 +226,17 @@ function Output({ result }: { result: GenerateSuccessBody }) {
         </p>
       ))}
 
-      <HookList hooks={result.hooks} />
-      <ScriptView script={result.script} idea={result.idea} />
+      <HookList hooks={result.hooks} generationId={result.meta.generationId} />
+      <ScriptView
+        script={result.script}
+        idea={result.idea}
+        generationId={result.meta.generationId}
+      />
 
       <p className="text-xs text-zinc-600">
         {result.meta.provider} · {result.meta.model} · {result.meta.latencyMs}ms ·{" "}
-        {result.meta.cacheReadTokens} cached input tokens
+        {result.meta.cacheReadTokens} cached input tokens · trace{" "}
+        <span className="font-mono">{result.meta.generationId}</span>
       </p>
     </div>
   );
