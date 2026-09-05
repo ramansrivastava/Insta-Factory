@@ -3,10 +3,11 @@
 Turn a raw content idea into several structurally distinct hook options plus a full
 Instagram Reel script — written in **your** voice, not a dropdown "tone".
 
-> **Status: Phase 1 (scaffold + eval harness).** The app boots, the LLM seam is in
-> place behind a provider-agnostic interface, and the smoke test and Layer-1 eval
-> both run green offline. The idea → hooks + script generator itself lands in
-> Phase 3; see `.factory/strategy/current.md` for the full build plan.
+> **Status: Phase 2 (voice profile).** The app boots, the LLM seam is in place
+> behind a provider-agnostic interface, and the smoke test and Layer-1 eval both
+> run green offline. The voice profile — schema, storage and trait distillation —
+> now exists and is documented below. The idea → hooks + script generator itself
+> lands in Phase 3; see `.factory/strategy/current.md` for the full build plan.
 
 ---
 
@@ -88,9 +89,16 @@ lib/llm/
   probe.ts               Tiny structured request used by tests and the eval
   adapters/anthropic.ts  Official @anthropic-ai/sdk, structured output
   adapters/mock.ts       Deterministic fixture responses, zero network
+lib/voice/
+  store.ts               load/save/validate data/voice-profile.json
+  distill.ts             One structured call: samples → distilled traits
+  banned.ts              Case/punctuation-insensitive banned-phrase matching
+types/voice.ts           Zod voice-profile schema (10-example hard cap)
+data/                    voice-profile.example.json (committed seed)
 fixtures/llm/            Mock adapter fixtures, keyed by request kind
 scripts/smoke.sh         End-to-end smoke test (build → start → /api/health)
 scripts/eval/run.mjs     Layer-1 deterministic eval harness
+scripts/voice/distill.mjs  `npm run voice:distill`
 tests/                   Vitest unit tests
 ```
 
@@ -106,6 +114,47 @@ Two deliberate constraints in the Anthropic adapter:
   current models reject them alongside structured output.
 - **No assistant prefill.** Output shape is enforced by the schema, not by
   seeding the assistant turn.
+
+---
+
+## The voice profile
+
+Generation is conditioned on `data/voice-profile.json`: distilled, hand-editable
+traits (`tone`, `sentence_rhythm`, `opener_patterns`, `recurring_phrases`,
+`banned_phrases`, `emoji_usage`, `vocabulary_register`) plus a **small** tagged
+set of real captions and scripts.
+
+```bash
+cp data/voice-profile.example.json data/voice-profile.json   # start from the seed
+```
+
+The example profile is committed so the core loop is runnable on checkout. Your
+own `data/voice-profile.json` is gitignored — it is personal data.
+
+**Examples are capped at 10, with a warning above 6.** That is a design
+constraint, not an arbitrary limit: more few-shot examples can *degrade* output
+(arXiv 2509.13196), and models tend to copy surface word choice while missing
+structural voice (arXiv 2509.14543). Distilled explicit traits plus a few
+curated examples beat a large raw dump, and the cap lives in the schema so it
+cannot be quietly regressed.
+
+### Distilling traits from your own writing
+
+```bash
+# paste 3-5 captions or scripts on stdin, separated by a line of ---
+npm run voice:distill
+
+# or point it at files
+npm run voice:distill -- sample1.txt sample2.txt sample3.txt
+```
+
+One structured LLM call through the same adapter seam, so it runs offline on the
+mock with no API key. The result is written to `data/voice-profile.draft.json`
+for you to read and edit — **it is never applied to your live profile
+automatically**. Copy it over `data/voice-profile.json` when you are happy with
+it. Any examples already in your profile are carried into the draft.
+
+---
 
 ## Eval
 

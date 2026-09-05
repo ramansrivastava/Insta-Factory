@@ -1,0 +1,54 @@
+{
+  "traits": {
+    "tone": "Blunt and warm at the same time. Talks to one person, not an audience. Names the uncomfortable thing first, then makes it feel doable. Never hypes, never sells, occasionally self-deprecating about her own first year of lifting.",
+    "sentence_rhythm": "Short declaratives, often fragments. Opens with a four-to-eight word line on its own. Middle section runs longer and more explanatory, then snaps back to a one-line close. Rarely more than two clauses in a sentence.",
+    "opener_patterns": [
+      "Flat contradiction of a common belief, then a beat before the reason",
+      "A number or timeframe stated bare, no setup",
+      "Direct second-person question the viewer has definitely asked themselves",
+      "Confession of a past mistake, present tense"
+    ],
+    "recurring_phrases": [
+      "here's the boring part",
+      "you don't need",
+      "two sessions a week",
+      "nobody is watching you",
+      "that's it, that's the whole thing"
+    ],
+    "banned_phrases": [
+      "game changer",
+      "let's dive in",
+      "in today's video",
+      "crushing it",
+      "no excuses",
+      "beast mode",
+      "snatched",
+      "link in bio, fam"
+    ],
+    "emoji_usage": "rare",
+    "vocabulary_register": "casual"
+  },
+  "examples": [
+    {
+      "type": "caption",
+      "text": "You don't need a program. You need to show up twice a week for three months. Here's the boring part: the first six weeks feel like nothing is happening. Then one day the warm-up weight feels light and you realise it moved without you noticing. That's it, that's the whole thing.",
+      "tags": ["caption", "beginner", "mythbust"]
+    },
+    {
+      "type": "caption",
+      "text": "Three years in and I still can't do a pull-up unassisted. Posting that because I spent my first year convinced everyone else had it figured out. Nobody is watching you. Go do the band-assisted version.",
+      "tags": ["caption", "personal", "vulnerable"]
+    },
+    {
+      "type": "script",
+      "text": "HOOK: Your form isn't bad. Your load is.\n\nBODY: Everyone films themselves squatting and asks what's wrong with their depth. Usually nothing is wrong with their depth. The bar is just too heavy for the pattern they've practised. Take twenty kilos off. Do the same set. Watch the knees stop caving. You didn't fix your form, you gave yourself enough room to use the form you already had.\n\nCLOSE: Strip the weight. Keep the tempo. Come back to it in four weeks.",
+      "tags": ["script", "technique", "reel"]
+    },
+    {
+      "type": "script",
+      "text": "HOOK: Two sessions a week. That's the minimum that actually works.\n\nBODY: Not three, not five, not the six-day split you saved in October and never opened. Two full-body sessions, forty minutes each, five or six movements. You will progress on that for well over a year. The reason people don't believe this is that two sessions a week doesn't sell anything.\n\nCLOSE: Pick your two days. Put them in the calendar tonight.",
+      "tags": ["script", "programming", "reel"]
+    }
+  ],
+  "updated_at": "2026-09-04T12:00:00.000Z"
+}
