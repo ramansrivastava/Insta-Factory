@@ -6,14 +6,31 @@ import {
   isEditTooLong,
 } from "@/components/generate/feedback.ts";
 import {
+  applyRegeneration,
+  buildRegeneratePayload,
+  failedCheckSummary,
+  isSteerTooLong,
+  type OutputState,
+} from "@/components/generate/regenerate.ts";
+import {
   isClaimUnverified,
   renderScriptForClipboard,
 } from "@/components/generate/script-text.ts";
 import { MIN_IDEA_LENGTH as PIPELINE_MIN } from "@/lib/generate/pipeline.ts";
 import { MIN_IDEA_LENGTH as IDEA_MIN } from "@/lib/generate/idea.ts";
-import { GenerateRequestSchema, HOOK_COUNT_OPTIONS } from "@/types/api.ts";
+import {
+  GenerateRequestSchema,
+  HOOK_COUNT_OPTIONS,
+  RegenerateRequestSchema,
+  type RegenerateSuccessBody,
+} from "@/types/api.ts";
 import { FeedbackRequestSchema, MAX_EDITED_TEXT_LENGTH } from "@/types/feedback.ts";
-import { MAX_HOOKS, MIN_HOOKS, type Script } from "@/types/generation.ts";
+import {
+  MAX_HOOKS,
+  MAX_STEER_LENGTH,
+  MIN_HOOKS,
+  type Script,
+} from "@/types/generation.ts";
 
 /**
  * The pure logic behind the output view. Rendering is left to a browser; what
@@ -138,5 +155,126 @@ describe("the feedback buttons' rules", () => {
   it("builds a payload the API will accept", () => {
     const payload = buildFeedbackPayload(subject, "edited", "My version.");
     expect(FeedbackRequestSchema.safeParse(payload).success).toBe(true);
+  });
+});
+
+/**
+ * The Regenerate buttons' rules.
+ *
+ * The one that matters is per-half provenance. After "Regenerate hooks" the
+ * panel is showing hooks from run B beside a script from run A, and a hook
+ * rated "used as-is" has to attach to B while the script's rating still
+ * attaches to A — otherwise the accept/edit/discard data starts crediting the
+ * wrong generation, silently and unrecoverably.
+ */
+describe("the regenerate buttons' rules", () => {
+  const base: OutputState = {
+    idea,
+    hookCount: 3,
+    hooks: [
+      { text: "Hook one.", angle: "contrarian", rationale: "why one" },
+      { text: "Hook two.", angle: "pain_point", rationale: "why two" },
+      { text: "Hook three.", angle: "bold_claim", rationale: "why three" },
+    ],
+    hooksGenerationId: "gen-a",
+    script: {
+      sections: [
+        { kind: "hook", text: "Opening line." },
+        { kind: "body", text: "The middle." },
+        { kind: "cta", text: "Follow for more." },
+      ],
+      claims: [],
+    },
+    scriptGenerationId: "gen-a",
+    usedExampleProfile: false,
+    profileWarnings: [],
+    latest: {
+      generationId: "gen-a",
+      provider: "mock",
+      model: "mock-fixture-model",
+      latencyMs: 12,
+      cacheReadTokens: 0,
+    },
+  };
+
+  function response(over: Partial<RegenerateSuccessBody>): RegenerateSuccessBody {
+    return {
+      ok: true,
+      target: "hooks",
+      idea,
+      hookCount: 3,
+      hooks: null,
+      script: null,
+      checks: [],
+      meta: {
+        generationId: "gen-b",
+        provider: "mock",
+        model: "mock-fixture-model",
+        cacheReadTokens: 900,
+        latencyMs: 20,
+        parentGenerationId: "gen-a",
+        usedExampleProfile: false,
+        profileWarnings: [],
+      },
+      ...over,
+    };
+  }
+
+  it("names the run that wrote the half being replaced, not the most recent one", () => {
+    const mixed: OutputState = { ...base, hooksGenerationId: "gen-b" };
+    expect(buildRegeneratePayload(mixed, "hooks", "").parentGenerationId).toBe("gen-b");
+    expect(buildRegeneratePayload(mixed, "script", "").parentGenerationId).toBe("gen-a");
+  });
+
+  it("sends the hooks on screen either way, and the steer only when there is one", () => {
+    expect(buildRegeneratePayload(base, "hooks", "  ")).not.toHaveProperty("steer");
+    const steered = buildRegeneratePayload(base, "script", "  lead with the mistake  ");
+    expect(steered.steer).toBe("lead with the mistake");
+    expect(steered.hooks).toEqual(base.hooks);
+  });
+
+  it("builds a payload the API will accept", () => {
+    expect(
+      RegenerateRequestSchema.safeParse(buildRegeneratePayload(base, "hooks", "blunter"))
+        .success,
+    ).toBe(true);
+    expect(isSteerTooLong("x".repeat(MAX_STEER_LENGTH + 1))).toBe(true);
+    expect(isSteerTooLong(`  ${"x".repeat(MAX_STEER_LENGTH)}  `)).toBe(false);
+  });
+
+  it("moves only the regenerated half, and re-points only that half's trace id", () => {
+    const newHooks = [{ text: "Fresh.", angle: "curiosity_gap" as const, rationale: "why" }];
+    const afterHooks = applyRegeneration(base, response({ hooks: newHooks }));
+
+    expect(afterHooks.hooks).toEqual(newHooks);
+    expect(afterHooks.hookCount).toBe(1);
+    expect(afterHooks.hooksGenerationId).toBe("gen-b");
+    expect(afterHooks.script).toBe(base.script);
+    expect(afterHooks.scriptGenerationId).toBe("gen-a");
+    expect(afterHooks.latest.cacheReadTokens).toBe(900);
+
+    const newScript: Script = { sections: base.script.sections, claims: [] };
+    const afterScript = applyRegeneration(
+      base,
+      response({ target: "script", script: newScript }),
+    );
+    expect(afterScript.scriptGenerationId).toBe("gen-b");
+    expect(afterScript.hooksGenerationId).toBe("gen-a");
+    expect(afterScript.hooks).toBe(base.hooks);
+  });
+
+  it("leaves the screen alone when the regenerated half is missing from the body", () => {
+    expect(applyRegeneration(base, response({ hooks: null }))).toBe(base);
+    expect(applyRegeneration(base, response({ target: "script", script: null }))).toBe(base);
+  });
+
+  it("says which gate the second attempt failed, and nothing when they all passed", () => {
+    expect(failedCheckSummary([{ name: "groundedness", passed: true, score: 1, details: "ok" }]))
+      .toBeNull();
+    expect(
+      failedCheckSummary([
+        { name: "groundedness", passed: false, score: 0, details: "invented a number" },
+      ]),
+    ).toContain("invented a number");
   });
 });

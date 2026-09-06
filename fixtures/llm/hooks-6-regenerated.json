@@ -1,0 +1,34 @@
+{
+  "hooks": [
+    {
+      "text": "Sunday night me writes the program. Tuesday morning me has to run it.",
+      "angle": "story_cold_open",
+      "rationale": "Opens inside the gap between planning and doing, which is the moment this idea is actually about — no argument needed before the viewer recognises it."
+    },
+    {
+      "text": "You didn't fall off. You built a week for someone with more free time than you have.",
+      "angle": "pain_point",
+      "rationale": "Takes the blame off the viewer and puts it on the plan, which is the reframe the rest of the reel depends on."
+    },
+    {
+      "text": "Consistency isn't discipline. It's a plan small enough that you can't talk yourself out of it.",
+      "angle": "contrarian",
+      "rationale": "Contradicts the discipline story head-on and lands the real mechanism in the same breath."
+    },
+    {
+      "text": "The version of this that actually sticks looks almost lazy written down.",
+      "angle": "curiosity_gap",
+      "rationale": "Promises something counterintuitive about the plan itself, so the viewer stays to see what it looks like."
+    },
+    {
+      "text": "The plan you can run tired is the only plan that counts.",
+      "angle": "bold_claim",
+      "rationale": "One bare assertion, no hedging — matches how she opens when she wants the claim to carry the whole hook."
+    },
+    {
+      "text": "You are not building around six free hours a week. You're building around the two sessions you'll defend.",
+      "angle": "stat_or_fact",
+      "rationale": "Leads on the two quantities the idea already supplies, so the number angle is filled without inventing anything."
+    }
+  ]
+}

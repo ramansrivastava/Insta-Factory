@@ -2,7 +2,7 @@
 /**
  * `npm run generations:summary` — what the generation trace says so far.
  *
- * Two questions, both of which are invisible without this:
+ * Three questions, all of which are invisible without this:
  *
  *   1. **Is prompt caching still working?** `cache_read_input_tokens` going to
  *      zero is the *only* signal that something per-request has leaked into the
@@ -14,6 +14,12 @@
  *      strategy and the only ground truth this product will ever have for that.
  *      Rates are reported for hooks and for scripts separately, because they
  *      are different products with different failure modes.
+ *
+ *   3. **How often was one pass not enough?** A regeneration is a creator
+ *      saying "not this" with a button instead of a rating, and it is counted
+ *      here as its own signal. It is not redundant with accept/edit/discard:
+ *      those describe the output that was finally kept, and say nothing about
+ *      how many attempts it took to get there.
  *
  * Reads `data/generations/*.jsonl` and writes a human-readable report to
  * stdout. `--json` emits the same numbers as one object, for anything that
@@ -31,8 +37,13 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-const { readTraceRecords, isGenerationRecord, isFeedbackRecord, GENERATIONS_DIR } =
-  await import(path.join(ROOT, "lib/generations/store.ts"));
+const {
+  readTraceRecords,
+  isGenerationRecord,
+  isFeedbackRecord,
+  isRegenerationRecord,
+  GENERATIONS_DIR,
+} = await import(path.join(ROOT, "lib/generations/store.ts"));
 const { FEEDBACK_OUTCOMES, FEEDBACK_OUTCOME_LABELS } = await import(
   path.join(ROOT, "types/feedback.ts")
 );
@@ -94,6 +105,22 @@ function summarise(records) {
     counts[entry.target][entry.outcome] += 1;
   }
 
+  // A regeneration names its parent; a first-pass run does not. Split rather
+  // than lumped, because a rate is only meaningful against the number of ideas
+  // that were actually attempted once.
+  const regenerations = generations.filter(isRegenerationRecord);
+  const firstPass = generations.filter((record) => !isRegenerationRecord(record));
+  const regeneratedParents = new Set(
+    regenerations.map((record) => record.parent_generation_id),
+  );
+  const regenerationsByTarget = { hooks: 0, script: 0 };
+  for (const record of regenerations) {
+    if (record.regenerated_target in regenerationsByTarget) {
+      regenerationsByTarget[record.regenerated_target] += 1;
+    }
+  }
+  const steered = regenerations.filter((record) => record.steer !== undefined).length;
+
   const cacheReads = generations.map((record) => record.usage.cache_read_input_tokens);
   const totalLatency = generations.reduce((sum, record) => sum + record.timings.total_ms, 0);
   const checkFailures = new Map();
@@ -111,6 +138,12 @@ function summarise(records) {
 
   return {
     generations: generations.length,
+    firstPassGenerations: firstPass.length,
+    regenerations: regenerations.length,
+    regenerationsByTarget,
+    /** Distinct runs that were regenerated at least once. */
+    regeneratedGenerations: regeneratedParents.size,
+    steeredRegenerations: steered,
     days: new Set(generations.map((record) => record.recorded_at.slice(0, 10))).size,
     providers: [...new Set(generations.map((record) => `${record.provider}/${record.model}`))],
     meanCacheReadInputTokens: mean(cacheReads),
@@ -185,6 +218,25 @@ function report(summary, files, skippedLines) {
     );
     lines.push(
       "    the cacheable prefix is varying per request — check lib/prompts/system.ts.",
+    );
+  }
+
+  lines.push("");
+  lines.push("Regeneration");
+  lines.push("------------");
+  lines.push(
+    `first-pass runs                  ${summary.firstPassGenerations}`,
+  );
+  lines.push(
+    `regenerations                    ${summary.regenerations} (${summary.regenerationsByTarget.hooks} hooks, ${summary.regenerationsByTarget.script} script)`,
+  );
+  lines.push(
+    `runs regenerated at least once   ${summary.regeneratedGenerations}/${summary.firstPassGenerations}`,
+  );
+  lines.push(`regenerations with a steer       ${summary.steeredRegenerations}`);
+  if (summary.regenerations === 0) {
+    lines.push(
+      "  every run was accepted on the first pass, or nobody has pressed the button yet.",
     );
   }
 
