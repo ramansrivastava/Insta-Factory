@@ -2,21 +2,10 @@ import type { Logger } from "pino";
 
 import { getAdapter } from "../llm/index.ts";
 import { normalizeIdea } from "./idea.ts";
-import { runLayer1Checks, type CheckResult } from "./checks.ts";
-import {
-  callFields,
-  errorFields,
-  generationLogger,
-  newGenerationId,
-  type GenerationPhase,
-} from "../log.ts";
-import {
-  appendTraceRecord,
-  profileHash,
-  tracingEnabled,
-  type GenerationRecord,
-  type TraceStoreOptions,
-} from "../generations/store.ts";
+import { runLayer1Checks } from "./checks.ts";
+import { callPhase, logChecks, recordTrace } from "./telemetry.ts";
+import { errorFields, generationLogger, newGenerationId } from "../log.ts";
+import { profileHash, type TraceStoreOptions } from "../generations/store.ts";
 import type { LlmAdapter, LlmUsage, StructuredResult } from "../llm/types.ts";
 import { assertHookCount, buildHooksRequest } from "../prompts/hooks.ts";
 import { buildScriptRequest } from "../prompts/script.ts";
@@ -60,7 +49,21 @@ export {
   MAX_IDEA_LENGTH,
   MIN_IDEA_LENGTH,
   normalizeIdea,
+  normalizeSteer,
 } from "./idea.ts";
+
+/**
+ * Re-running one half of a generation lives in `./regenerate.ts`, so that this
+ * file stays the two-call pipeline and nothing else. Re-exported here for the
+ * same reason as the idea helpers above: this is where callers look.
+ */
+export {
+  regenerateHooks,
+  regenerateScript,
+  type RegenerateHooksInput,
+  type RegenerateScriptInput,
+  type RegenerationResult,
+} from "./regenerate.ts";
 
 export interface GenerateInput {
   idea: string;
@@ -229,85 +232,4 @@ export async function generate(input: GenerateInput): Promise<GenerationResult> 
   );
 
   return result;
-}
-
-/** One LLM call, bracketed by an issued line and a returned-or-failed line. */
-async function callPhase<T>(
-  log: Logger,
-  base: { provider: string; model: string },
-  phase: GenerationPhase,
-  run: () => Promise<StructuredResult<T>>,
-): Promise<StructuredResult<T>> {
-  log.info({ event: "llm.call.issued", ...base, phase }, `${phase} call issued`);
-  const startedAt = Date.now();
-
-  try {
-    const result = await run();
-    log.info(
-      { event: "llm.call.returned", ...callFields(phase, result) },
-      `${phase} call returned`,
-    );
-    return result;
-  } catch (error) {
-    log.error(
-      {
-        event: "llm.call.failed",
-        ...base,
-        phase,
-        latency_ms: Date.now() - startedAt,
-        err: errorFields(error),
-      },
-      `${phase} call failed`,
-    );
-    throw error;
-  }
-}
-
-/**
- * One line carrying every check's verdict, plus a warning per failure.
- *
- * Both, not either: the summary line is what makes pass rates countable across
- * runs, and the per-failure warning is what makes a single bad generation
- * findable without parsing an array out of an info line.
- */
-function logChecks(log: Logger, checks: CheckResult[]): void {
-  log.info(
-    {
-      event: "checks.run",
-      checks: checks.map((check) => ({
-        name: check.name,
-        passed: check.passed,
-        score: check.score,
-      })),
-      checks_failed: checks.filter((check) => !check.passed).length,
-    },
-    "layer-1 checks run",
-  );
-
-  for (const check of checks) {
-    if (check.passed) continue;
-    log.warn(
-      { event: "check.failed", check: check.name, details: check.details },
-      `layer-1 check failed: ${check.name}`,
-    );
-  }
-}
-
-/** Appends the trace record, unless tracing is switched off for this run. */
-function recordTrace(log: Logger, input: GenerateInput, record: GenerationRecord): void {
-  const enabled = input.trace?.enabled ?? tracingEnabled(input.env);
-  if (!enabled) return;
-
-  const outcome = appendTraceRecord(record, input.trace);
-  if (outcome.written) {
-    log.debug({ event: "trace.written", file: outcome.file }, "generation trace written");
-    return;
-  }
-
-  // A trace that cannot be written is worth a loud line and nothing more: the
-  // generation itself already succeeded and the creator is owed their script.
-  log.error(
-    { event: "trace.write_failed", file: outcome.file, err: errorFields(outcome.error) },
-    "could not append the generation trace",
-  );
 }

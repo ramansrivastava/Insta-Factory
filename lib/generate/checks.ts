@@ -65,7 +65,7 @@ export function checkHookDistinctiveness(hooks: readonly Hook[]): CheckResult {
 /** Every piece of generated prose, labelled by where it came from. */
 export function collectGeneratedText(
   hooks: readonly Hook[],
-  script: Script,
+  script: Script | null,
 ): { label: string; text: string; spoken: boolean }[] {
   const pieces: { label: string; text: string; spoken: boolean }[] = [];
 
@@ -73,7 +73,7 @@ export function collectGeneratedText(
     pieces.push({ label: `hook ${index + 1} (${hook.angle})`, text: hook.text, spoken: true });
   });
 
-  script.sections.forEach((section, index) => {
+  script?.sections.forEach((section, index) => {
     pieces.push({ label: `section ${index + 1} (${section.kind})`, text: section.text, spoken: true });
     if (section.on_screen_text) {
       pieces.push({
@@ -92,7 +92,7 @@ export function collectGeneratedText(
 /** No phrase from the creator's banned list appears anywhere in the output. */
 export function checkBannedPhrases(
   hooks: readonly Hook[],
-  script: Script,
+  script: Script | null,
   bannedPhrases: readonly string[],
 ): CheckResult {
   if (bannedPhrases.length === 0) {
@@ -248,7 +248,7 @@ export interface GroundednessViolation {
  */
 export function findGroundednessViolations(
   hooks: readonly Hook[],
-  script: Script,
+  script: Script | null,
   idea: string,
 ): GroundednessViolation[] {
   const violations: GroundednessViolation[] = [];
@@ -270,7 +270,7 @@ export function findGroundednessViolations(
     }
   }
 
-  script.claims.forEach((claim, index) => {
+  script?.claims.forEach((claim, index) => {
     if (!ideaContains(idea, claim.grounded_in)) {
       violations.push({
         kind: "unquoted_claim",
@@ -285,7 +285,7 @@ export function findGroundednessViolations(
 
 export function checkGroundedness(
   hooks: readonly Hook[],
-  script: Script,
+  script: Script | null,
   idea: string,
 ): CheckResult {
   const violations = findGroundednessViolations(hooks, script, idea);
@@ -293,7 +293,9 @@ export function checkGroundedness(
   if (violations.length === 0) {
     return pass(
       "groundedness",
-      `no unsupported numbers, names or claims across ${script.sections.length} sections and ${script.claims.length} claims`,
+      script === null
+        ? `no unsupported numbers or names across ${hooks.length} hooks`
+        : `no unsupported numbers, names or claims across ${script.sections.length} sections and ${script.claims.length} claims`,
     );
   }
 
@@ -301,6 +303,53 @@ export function checkGroundedness(
     .map((violation) => `${violation.kind} ${violation.value} in ${violation.where}`)
     .join("; ");
   return fail("groundedness", `not grounded in the idea: ${rendered}`);
+}
+
+/**
+ * The subset of checks a hooks-only regeneration can answer.
+ *
+ * Section completeness is absent because there is no script in this run to be
+ * complete — reporting it as failed would be reporting a script that was never
+ * asked for. The remaining four are exactly as strict as they are in a full
+ * generation; a regenerated hook set is not held to a lower bar than a
+ * first-round one.
+ */
+export interface HooksCheckInput {
+  idea: string;
+  hooks: readonly Hook[];
+  hookCount: number;
+  bannedPhrases: readonly string[];
+}
+
+export function runHookChecks(input: HooksCheckInput): CheckResult[] {
+  return [
+    checkHookCount(input.hooks, input.hookCount),
+    checkHookDistinctiveness(input.hooks),
+    checkBannedPhrases(input.hooks, null, input.bannedPhrases),
+    checkGroundedness(input.hooks, null, input.idea),
+  ];
+}
+
+/**
+ * The subset a script-only regeneration can answer.
+ *
+ * The hooks are still passed in — they are unchanged and still on screen, and a
+ * banned phrase or an invented number in them is still in the creator's output
+ * whether or not this run produced them.
+ */
+export interface ScriptCheckInput {
+  idea: string;
+  hooks: readonly Hook[];
+  script: Script;
+  bannedPhrases: readonly string[];
+}
+
+export function runScriptChecks(input: ScriptCheckInput): CheckResult[] {
+  return [
+    checkBannedPhrases(input.hooks, input.script, input.bannedPhrases),
+    checkSectionCompleteness(input.script),
+    checkGroundedness(input.hooks, input.script, input.idea),
+  ];
 }
 
 export interface Layer1Input {

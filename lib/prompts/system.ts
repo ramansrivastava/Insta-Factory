@@ -136,3 +136,27 @@ export function renderBannedReminder(traits: VoiceTraits): string {
     .map((phrase) => `"${phrase}"`)
     .join(", ")}.`;
 }
+
+/**
+ * The optional one-line steer, rendered for the *user turn*.
+ *
+ * Placement is the whole design. The steer is per-request, so putting it
+ * anywhere in the system blocks would change the cacheable prefix on every
+ * regeneration and silently drop the cache hit rate to zero — the creator would
+ * pay full input price for each nudge, with no error to tell anyone why. It
+ * belongs after the last cache breakpoint, which in this codebase means the
+ * user message and nowhere else.
+ *
+ * Returns an empty string for an absent or blank steer, so callers can
+ * unconditionally append it.
+ */
+export function renderSteer(steer: string | undefined | null): string {
+  const trimmed = (steer ?? "").trim();
+  if (!trimmed) return "";
+  return [
+    "<steer>",
+    trimmed,
+    "</steer>",
+    "Apply that adjustment. It refines this attempt; it does not replace the voice profile or the grounding rule above — where they disagree, those win.",
+  ].join("\n");
+}

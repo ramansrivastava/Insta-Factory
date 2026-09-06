@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { appendFileSync, mkdirSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-import type { Hook, Script } from "../../types/generation.ts";
+import type { Hook, RegenerationTarget, Script } from "../../types/generation.ts";
 import type { FeedbackOutcome, FeedbackTarget } from "../../types/feedback.ts";
 import type { VoiceProfile } from "../../types/voice.ts";
 
@@ -45,9 +45,31 @@ export interface GenerationRecord {
   provider: string;
   model: string;
   hooks: Hook[];
-  script: Script;
-  /** Per-check pass/fail from `runLayer1Checks`. */
+  /**
+   * `null` on a hooks-only regeneration, where no script was asked for. A
+   * regeneration record is not a partial generation record with holes in it —
+   * it is a record of a run that genuinely had one half.
+   */
+  script: Script | null;
+  /**
+   * Set only on a regeneration: the generation this one was launched from.
+   *
+   * This is the field that makes dissatisfaction countable. Accept/edit/discard
+   * says what the creator did with the output they kept; a chain of records
+   * joined by parent id says how many attempts it took to get there, which is a
+   * different question and the one nobody can answer retroactively.
+   */
+  parent_generation_id?: string;
+  /** Set only on a regeneration: which half was re-run. */
+  regenerated_target?: RegenerationTarget;
+  /** The one-line steer, when the creator gave one. Regeneration only. */
+  steer?: string;
+  /** Per-check pass/fail. The full five for a generation, the relevant subset for a regeneration. */
   checks: { name: string; passed: boolean; score: number; details: string }[];
+  /**
+   * `hooks_ms` is 0 on a script-only regeneration and `script_ms` is 0 on a
+   * hooks-only one — the call was not made, so there is no latency to report.
+   */
   timings: { total_ms: number; hooks_ms: number; script_ms: number };
   usage: {
     input_tokens: number;
@@ -205,4 +227,14 @@ export function isGenerationRecord(record: TraceRecord): record is GenerationRec
 
 export function isFeedbackRecord(record: TraceRecord): record is FeedbackRecord {
   return record.type === "feedback";
+}
+
+/**
+ * A generation launched from another one. The parent id is the discriminator
+ * rather than a separate record type, so every existing reader of the trace —
+ * `generations:summary`, a human with `jq` — keeps working on a file that now
+ * contains regenerations too.
+ */
+export function isRegenerationRecord(record: TraceRecord): boolean {
+  return isGenerationRecord(record) && record.parent_generation_id !== undefined;
 }

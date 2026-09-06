@@ -11,6 +11,7 @@ import {
 import {
   buildVoiceSystemBlocks,
   renderBannedReminder,
+  renderSteer,
   renderVoiceReminder,
 } from "./system.ts";
 
@@ -96,6 +97,8 @@ export interface ScriptRequestInput {
   idea: string;
   profile: VoiceProfile;
   hooks: readonly Hook[];
+  /** The creator's optional one-line adjustment. Regeneration only. */
+  steer?: string;
 }
 
 export function buildScriptRequest(
@@ -117,11 +120,14 @@ export function buildScriptRequest(
         role: "user",
         content: [
           "Here is my raw idea for this Reel, and the hook options you just wrote for it. Write the full script.",
-          "",
           `<idea>\n${idea}\n</idea>`,
-          "",
           renderHooksContext(input.hooks),
-        ].join("\n"),
+          // Last, and only ever here: a steer in a cacheable block would cost
+          // the whole voice prefix's cache hit on every regeneration.
+          renderSteer(input.steer),
+        ]
+          .filter((part) => part !== "")
+          .join("\n\n"),
       },
     ],
     schema: ScriptSchema,

@@ -185,7 +185,12 @@ describe("the pipeline's trace record", () => {
     expect(record?.hook_count).toBe(5);
     expect(record?.profile_hash).toBe(profileHash(profile));
     expect(record?.hooks).toHaveLength(5);
-    expect(record?.script.sections.length).toBeGreaterThan(0);
+    // A full generation always records a script; only a hooks-only
+    // regeneration leaves this null.
+    expect(record?.script).not.toBeNull();
+    expect(record?.script?.sections.length).toBeGreaterThan(0);
+    expect(record?.parent_generation_id).toBeUndefined();
+    expect(record?.regenerated_target).toBeUndefined();
     expect(record?.checks.map((check) => check.name)).toEqual([
       "hook_count",
       "hook_distinctiveness",

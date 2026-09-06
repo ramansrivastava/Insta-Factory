@@ -7,11 +7,13 @@ import {
   assertHookCount,
   buildHooksRequest,
   hooksRequestKind,
+  renderAvoidHooks,
   HookRequestError,
 } from "@/lib/prompts/hooks.ts";
 import { buildScriptRequest, renderSectionInstructions } from "@/lib/prompts/script.ts";
 import {
   buildVoiceSystemBlocks,
+  renderSteer,
   renderTraits,
   renderVoiceReminder,
 } from "@/lib/prompts/system.ts";
@@ -182,5 +184,115 @@ describe("buildScriptRequest", () => {
     expect(
       buildScriptRequest({ idea: SAMPLE_IDEA, profile, hooks }).samplingHints,
     ).toBeUndefined();
+  });
+});
+
+/**
+ * Regeneration prompts.
+ *
+ * Two properties matter and neither is visible in the output: that the rejected
+ * hooks actually reach the model, and that nothing per-request ever lands above
+ * the last cache breakpoint. The second one has no failure mode you can see —
+ * a steer in a cacheable block produces identical text and a silently doubled
+ * bill — so it is asserted here rather than trusted.
+ */
+describe("renderAvoidHooks", () => {
+  it("is empty for an empty list, so callers can append it unconditionally", () => {
+    expect(renderAvoidHooks([])).toBe("");
+  });
+
+  it("names the angle beside each rejected line, not just the text", () => {
+    const rendered = renderAvoidHooks(hooks);
+    for (const hook of hooks) {
+      expect(rendered).toContain(hook.text);
+      expect(rendered).toContain(hook.angle);
+    }
+  });
+});
+
+describe("renderSteer", () => {
+  it("is empty for an absent or blank steer", () => {
+    expect(renderSteer(undefined)).toBe("");
+    expect(renderSteer(null)).toBe("");
+    expect(renderSteer("   ")).toBe("");
+  });
+
+  it("subordinates the steer to the voice profile and the grounding rule", () => {
+    const rendered = renderSteer("make it blunter");
+    expect(rendered).toContain("make it blunter");
+    expect(rendered.toLowerCase()).toContain("voice profile");
+  });
+});
+
+describe("buildHooksRequest on a regeneration", () => {
+  it("passes the rejected hooks in the user turn and nowhere else", () => {
+    const request = buildHooksRequest({
+      idea: SAMPLE_IDEA,
+      profile,
+      hookCount: 5,
+      avoid: hooks,
+      steer: "make them blunter",
+    });
+
+    const userTurn = request.messages[0]!.content;
+    for (const hook of hooks) {
+      expect(userTurn).toContain(hook.text);
+    }
+    expect(userTurn).toContain("make them blunter");
+
+    // The whole economics of the feature: the cacheable prefix must be
+    // byte-identical to a first-pass request for the same creator and count.
+    for (const block of request.system) {
+      expect(block.text).not.toContain(hooks[0]!.text);
+      expect(block.text).not.toContain("make them blunter");
+    }
+  });
+
+  it("leaves the cacheable prefix byte-identical to the first-pass request", () => {
+    const first = buildHooksRequest({ idea: SAMPLE_IDEA, profile, hookCount: 5 });
+    const again = buildHooksRequest({
+      idea: SAMPLE_IDEA,
+      profile,
+      hookCount: 5,
+      avoid: hooks,
+      steer: "lead with the mistake",
+    });
+
+    expect(again.system.map((block) => block.text)).toEqual(
+      first.system.map((block) => block.text),
+    );
+    expect(again.kind).toBe(first.kind);
+  });
+
+  it("puts the steer after the rejected hooks, so it reads as the last word", () => {
+    const userTurn = buildHooksRequest({
+      idea: SAMPLE_IDEA,
+      profile,
+      hookCount: 5,
+      avoid: hooks,
+      steer: "shorter",
+    }).messages[0]!.content;
+
+    expect(userTurn.indexOf("<steer>")).toBeGreaterThan(userTurn.indexOf("<already_shown>"));
+  });
+});
+
+describe("buildScriptRequest on a regeneration", () => {
+  it("appends the steer to the user turn and leaves the prefix alone", () => {
+    const first = buildScriptRequest({ idea: SAMPLE_IDEA, profile, hooks });
+    const again = buildScriptRequest({
+      idea: SAMPLE_IDEA,
+      profile,
+      hooks,
+      steer: "lead with the mistake",
+    });
+
+    expect(again.messages[0]!.content).toContain("lead with the mistake");
+    expect(again.system.map((block) => block.text)).toEqual(
+      first.system.map((block) => block.text),
+    );
+    for (const block of again.system) {
+      expect(block.text).not.toContain("lead with the mistake");
+    }
   });
 });
